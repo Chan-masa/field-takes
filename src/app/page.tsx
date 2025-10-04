@@ -246,22 +246,42 @@ function Stepper({
 }
 
 
-function SuffixRow({ value, onChange }: { value: Suffix; onChange: (s: Suffix) => void }) {
+
+function SuffixRow({
+  value,
+  onChange,
+}: {
+  value: Suffix;
+  onChange: (s: Suffix) => void;
+}) {
   return (
     <div className="flex items-center gap-1 flex-wrap">
-      {SUFFIXES.map((s) => (
-        <button
-          key={s || "none"}
-          type="button"
-          className={`h-8 px-2 text-xs rounded border ${s === "" ? "bg-slate-50" : "bg-violet-50"} ${value === s ? "ring-2 ring-violet-300" : ""}`}
-          onClick={() => onChange(s as Suffix)}
-        >
-          {s === "" ? "なし" : s}
-        </button>
-      ))}
+      {SUFFIXES.map((s) => {
+        const isSelected = value === s;
+        const isNone = s === "";
+        const base =
+          isNone
+            ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+            : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
+        const selected =
+          isSelected
+            ? "ring-2 ring-violet-400 dark:ring-violet-300"
+            : "";
+        return (
+          <button
+            key={s || "none"}
+            type="button"
+            className={`h-8 px-2 text-xs rounded border ${base} ${selected}`}
+            onClick={() => onChange(s as Suffix)}
+          >
+            {isNone ? "なし" : s}
+          </button>
+        );
+      })}
     </div>
   );
 }
+
 
 function Collapsible({
   title,
