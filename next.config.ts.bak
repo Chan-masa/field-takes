@@ -1,0 +1,27 @@
+// next.config.ts
+import withPWA from 'next-pwa';
+
+const baseConfig: import('next').NextConfig = {
+  reactStrictMode: true,
+
+  // ビルド時に ESLint の型エラーで止まらないようにする
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  // Turbopack がワークスペースのルートを勘違いする警告を抑える
+  turbopack: {
+    root: __dirname,
+  },
+};
+
+// PWA を有効化
+const config = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  // 開発中は無効、本番ビルド/起動で有効
+  disable: process.env.NODE_ENV === 'development',
+})(baseConfig);
+
+export default config;
