@@ -178,30 +178,65 @@ function Stepper({
 }) {
   const { num } = splitNumAndSuffix(value);
   const clamp = (v: number) => Math.max(0, v);
+
+
   const palette =
     variant === "scene"
-      ? { btn: "bg-emerald-100 hover:bg-emerald-200 border-emerald-200", box: "bg-emerald-50 border-emerald-200", text: "text-emerald-900" }
+      ? {
+          btn: "border-emerald-200 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-emerald-100",
+          box: "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/40 dark:border-emerald-700",
+          text: "text-emerald-900 dark:text-emerald-100",
+        }
       : variant === "cut"
-      ? { btn: "bg-sky-100 hover:bg-sky-200 border-sky-200", box: "bg-sky-50 border-sky-200", text: "text-sky-900" }
-      : { btn: "bg-rose-100 hover:bg-rose-200 border-rose-200", box: "bg-rose-50 border-rose-200", text: "text-rose-900" };
+      ? {
+          btn: "border-sky-200 bg-sky-100 hover:bg-sky-200 dark:bg-sky-800 dark:hover:bg-sky-700 dark:text-sky-100",
+          box: "bg-sky-50 border-sky-200 dark:bg-sky-900/40 dark:border-sky-700",
+          text: "text-sky-900 dark:text-sky-100",
+        }
+      : {
+          btn: "border-rose-200 bg-rose-100 hover:bg-rose-200 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-rose-100",
+          box: "bg-rose-50 border-rose-200 dark:bg-rose-900/40 dark:border-rose-700",
+          text: "text-rose-900 dark:text-rose-100",
+        };
+
   return (
     <div className="space-y-1">
       <label className={`text-sm font-semibold ${palette.text}`}>{label}</label>
       <div className="flex gap-2 items-center">
         {fast > 0 && (
-          <button type="button" className={`h-10 px-3 border rounded ${palette.btn}`} onClick={() => onChange(String(clamp(num - fast)))}>
+          <button
+            type="button"
+            className={`h-10 px-3 border rounded ${palette.btn}`}
+            onClick={() => onChange(String(clamp(num - fast)))}
+          >
             −{fast}
           </button>
         )}
-        <button type="button" className={`h-12 w-12 border rounded ${palette.btn}`} onClick={() => onChange(String(clamp(num - 1)))}>
+        <button
+          type="button"
+          className={`h-12 w-12 border rounded ${palette.btn}`}
+          onClick={() => onChange(String(clamp(num - 1)))}
+        >
           −
         </button>
-        <div className={`h-12 flex-1 grid place-items-center text-xl border rounded-xl select-none ${palette.box} ${palette.text}`}>{num}</div>
-        <button type="button" className={`h-12 w-12 border rounded ${palette.btn}`} onClick={() => onChange(String(clamp(num + 1)))}>
+        <div
+          className={`h-12 flex-1 grid place-items-center text-xl border rounded-xl select-none ${palette.box} ${palette.text}`}
+        >
+          {num}
+        </div>
+        <button
+          type="button"
+          className={`h-12 w-12 border rounded ${palette.btn}`}
+          onClick={() => onChange(String(clamp(num + 1)))}
+        >
           ＋
         </button>
         {fast > 0 && (
-          <button type="button" className={`h-10 px-3 border rounded ${palette.btn}`} onClick={() => onChange(String(clamp(num + fast)))}>
+          <button
+            type="button"
+            className={`h-10 px-3 border rounded ${palette.btn}`}
+            onClick={() => onChange(String(clamp(num + fast)))}
+          >
             +{fast}
           </button>
         )}
@@ -209,6 +244,7 @@ function Stepper({
     </div>
   );
 }
+
 
 function SuffixRow({ value, onChange }: { value: Suffix; onChange: (s: Suffix) => void }) {
   return (
@@ -838,11 +874,12 @@ function AppInner() {
                   {(["OK", "NG", "KEEP"] as const).map((s) => {
                     const selected = draft.status === s;
                     const base =
-                      s === "OK"
-                        ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200"
-                        : s === "NG"
-                        ? "border-rose-300 bg-rose-100 hover:bg-rose-200"
-                        : "border-amber-300 bg-amber-100 hover:bg-amber-200";
+  s === "OK"
+    ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-emerald-100"
+    : s === "NG"
+    ? "border-rose-300 bg-rose-100 hover:bg-rose-200 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-rose-100"
+    : "border-amber-300 bg-amber-100 hover:bg-amber-200 dark:bg-amber-800 dark:hover:bg-amber-700 dark:text-amber-100";
+
                     return (
                       <button
                         key={s}
@@ -979,7 +1016,12 @@ function AppInner() {
             {(["OK", "NG", "KEEP"] as const).map((s) => {
               const selected = draft.status === s;
               const base =
-                s === "OK" ? "border-emerald-300 bg-emerald-100" : s === "NG" ? "border-rose-300 bg-rose-100" : "border-amber-300 bg-amber-100";
+  s === "OK"
+    ? "border-emerald-300 bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+    : s === "NG"
+    ? "border-rose-300 bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
+    : "border-amber-300 bg-amber-100 dark:bg-amber-800 dark:text-amber-100";
+
               return (
                 <button
                   key={s}
