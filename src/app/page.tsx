@@ -63,7 +63,7 @@ function splitNumAndSuffix(value: string): { num: number; suffix: Suffix } {
   return { num: parseInt(m[1], 10) || 0, suffix: (m[2] || "") as Suffix };
 }
 function combine(num: number, suffix: Suffix) {
-  return `${Math.max(0, num)}${suffix}`;
+  return `${Math.max(1, num)}${suffix}`;
 }
 function formatDT(iso: string): string {
   try {
@@ -177,7 +177,7 @@ function Stepper({
   fast?: number;
 }) {
   const { num } = splitNumAndSuffix(value);
-  const clamp = (v: number) => Math.max(0, v);
+  const clamp = (v: number) => Math.max(1, v);
 
 
   const palette =
@@ -364,9 +364,9 @@ function AppInner() {
   // draft
   const [draft, setDraft] = useState({
     fileNo: "",
-    sceneNum: 0,
+    sceneNum: 1,
     sceneSuffix: "" as Suffix,
-    cutNum: 0,
+    cutNum: 1,
     cutSuffix: "" as Suffix,
     takeNum: 1,
     status: "KEEP" as TakeStatus,
@@ -497,10 +497,10 @@ useEffect(() => {
 
   // setters that auto reset
   function setSceneNum(n: number) {
-    setDraft((d) => ({ ...d, sceneNum: n, cutNum: 1, cutSuffix: "", takeNum: 1 }));
+    setDraft((d) => ({ ...d, sceneNum: Math.max(1,n), cutNum: 1, cutSuffix: "", takeNum: 1 }));
   }
   function setCutNum(n: number) {
-    setDraft((d) => ({ ...d, cutNum: n, takeNum: 1 }));
+    setDraft((d) => ({ ...d, cutNum: Math.max(1,n), takeNum: 1 }));
   }
 
   // CRUD rows
@@ -556,9 +556,9 @@ useEffect(() => {
     setDraft((d) => ({
       ...d,
       fileNo: r.fileNo,
-      sceneNum: sc.num,
+      sceneNum: Math.max(1, sc.num),
       sceneSuffix: sc.suffix,
-      cutNum: cu.num,
+      cutNum: Math.max(1, cu.num),
       cutSuffix: cu.suffix,
       takeNum: parseInt(r.takeNo || "1", 10) || 1,
       status: r.status,
