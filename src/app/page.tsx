@@ -431,9 +431,12 @@ useEffect(() => {
 useEffect(() => {
   if (!scrollToEndNext.current) return;
   scrollToEndNext.current = false;
+  requestAnimationFrame(() => {
   const el = sheetRef.current;
   if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-}, [rows]);
+  endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  });
+}, [rows.length]);
 
   useEffect(() => {
     const ps = loadProjects();
@@ -711,7 +714,7 @@ useEffect(() => {
     {/* 左側：プロジェクト操作 */}
     <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">プロジェクト</span>
     <button className="h-8 px-2 text-xs border rounded shrink-0 bg-white dark:bg-slate-800" onClick={openPicker}>{projectName()||"未選択"}</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={() =>createProject}>新規</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={() => createProject()}>新規</button>
     <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={renameProject}>名称</button>
     <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={duplicateProject}>複製</button>
     <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={exportProjectJSON}>JSON出</button>
@@ -800,7 +803,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto　overflow-y-auto max-h-[60vh]">
+                <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
                   <table className="min-w-full border text-sm">
                     <thead className="bg-neutral-50 dark:bg-slate-700">
                       <tr>
