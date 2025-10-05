@@ -657,7 +657,7 @@ function AppInner() {
         {/* Top bar */}
        {/* Top bar (sticky, wrap, safe text sizes) */}
 <div className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b mb-2">
-  <div className="flex flex-wrap items-center gap-2 p-2">
+  <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 p-2">
     <div className="flex items-center gap-2 flex-1 min-w-[280px]">
       <span className="text-[11px] text-slate-500 dark:text-slate-400">プロジェクト</span>
       <div className="flex items-center gap-1 flex-wrap">
@@ -665,12 +665,12 @@ function AppInner() {
           onClick={openPicker}>
           {projectName() || "未選択"}
         </button>
-        <button className="h-8 px-2 text-xs border rounded" onClick={() => createProject()}>新規</button>
-        <button className="h-8 px-2 text-xs border rounded" onClick={renameProject}>名称</button>
-        <button className="h-8 px-2 text-xs border rounded" onClick={duplicateProject}>複製</button>
-        <button className="h-8 px-2 text-xs border rounded" onClick={exportProjectJSON}>JSON出</button>
-        <button className="h-8 px-2 text-xs border rounded" onClick={() => jsonInputRef.current?.click()}>JSON入</button>
-        <button className="h-8 px-2 text-xs border rounded border-rose-300 text-rose-700" onClick={deleteProject}>削除</button>
+        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={() => createProject()}>新規</button>
+        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={renameProject}>名称</button>
+        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={duplicateProject}>複製</button>
+        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={exportProjectJSON}>JSON出</button>
+        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={() => jsonInputRef.current?.click()}>JSON入</button>
+        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate border-rose-300 text-rose-700" onClick={deleteProject}>削除</button>
       </div>
       <input ref={jsonInputRef} type="file" accept="application/json" className="hidden"
         onChange={(e) => { const f=e.target.files?.[0]; if(f) importProjectJSON(f); e.currentTarget.value=""; }} />
@@ -997,12 +997,15 @@ function AppInner() {
 <div className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75">
   <details className="group">
     <summary className="list-none cursor-pointer">
-      <div className="px-3 py-2 text-center text-[11px] text-slate-500 dark:text-slate-300">
-        ▼ 入力パネルを展開
-      </div>
+     <div className="max-w-7xl mx-auto px-3 py-2 grid grid-cols-5 gap-2">
+    ...
+  </div>
+  <div className="max-w-7xl mx-auto px-3 pb-2 -mt-1 text-center text-[11px] text-slate-500 dark:text-slate-300">
+    ▼ 展開
+  </div>
     </summary>
 
-    <div className="max-h-[65vh] overflow-y-auto px-3 pb-3 space-y-3">
+    <div className="max-w-7xl mx-auto max-h-[65vh] overflow-y-auto px-3 pb-3 space-y-3">
 
       {/* 1) ファイル番号 */}
       <div className="space-y-1">
