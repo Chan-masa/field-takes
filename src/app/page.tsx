@@ -4,6 +4,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 // ====== Types ======
+type SampleRate = "44.1kHz" | "48kHz" | "96kHz";
+type BitDepth  = "16bit" | "24bit" | "32bit float";
+
+const AUDIO_SETTINGS_KEY = "field_audio_settings_v1";
+
 type TakeStatus = "OK" | "NG" | "KEEP";
 type Hand = "right" | "left";
 type ThemeMode = "light" | "dark";
@@ -106,6 +111,7 @@ function toCSV(rows: TakeRow[]): string {
     )
     .join("\n");
 }
+
 function fromCSV(csv: string): TakeRow[] {
   const lines = csv.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
@@ -307,6 +313,15 @@ function Collapsible({
     </div>
   );
 }
+const [sampleRate, setSampleRate] = useState<SampleRate>(() => {
+  try { return (JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY) || "{}").sampleRate as SampleRate) || "48kHz"; } catch { return "48kHz"; }
+});
+const [bitDepth, setBitDepth] = useState<BitDepth>(() => {
+  try { return (JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY) || "{}").bitDepth  as BitDepth)  || "24bit"; } catch { return "24bit"; }
+});
+useEffect(() => {
+  try { localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify({ sampleRate, bitDepth })); } catch {}
+}, [sampleRate, bitDepth]);
 
 // ====== Storage helpers ======
 function loadProjects(): Project[] {
@@ -373,6 +388,13 @@ function AppInner() {
     mics: ["", "", "", "", "", "", "", ""],
     note: "",
   });
+  // オーディオ設定
+  const [sampleRate, setSampleRate] = useState<SampleRate>(
+    (typeof window !== "undefined" && (localStorage.getItem(AUDIO_SETTINGS_KEY+"_sr") as SampleRate)) || "48kHz"
+  );
+  const [bitDepth, setBitDepth] = useState<BitDepth>(
+    (typeof window !== "undefined" && (localStorage.getItem(AUDIO_SETTINGS_KEY+"_bd") as BitDepth)) || "24bit"
+  );
 
 // === Undo / Redo 用スナップショット ===
 type Snapshot = { rows: typeof rows; draft: typeof draft };
@@ -572,27 +594,37 @@ useEffect(() => {
     pushHistory();
     setDraft((d) => ({ ...d, sceneNum: 1, cutNum: 1, takeNum: 1 }));
   }
+// CSV出力（AppInner内）
+const handleExportCSV = () => {
+  const csv = toCSV(rows);
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${projectName() || "project"}-takes.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
-  // CSV IO (per project)
-  function exportCSV() {
-    const blob = new Blob(["\ufeff" + toCSV(rows)], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${projectName() || "project"}-takes.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-  function importCSV(file: File) {
+
+    function importCSV(file: File) {
     const r = new FileReader();
     r.onload = (e) => {
-      const t = String(e.target?.result || "");
+      let t = String(e.target?.result || "");
+
+      // ▼ 追加: 先頭行が "SampleRate:" や "BitDepth:" を含む場合はスキップ
+      const firstLine = t.split(/\r?\n/)[0] || "";
+      if (firstLine.includes("SampleRate:") || firstLine.includes("BitDepth:")) {
+        t = t.split(/\r?\n/).slice(1).join("\n");
+      }
+
       const incoming = fromCSV(t);
       if (!incoming.length) return alert("有効な行なし");
       setRows((p) => [...p, ...incoming]);
     };
     r.readAsText(file);
   }
+
 
   // project ops
   function projectName(): string {
@@ -744,6 +776,33 @@ useEffect(() => {
       <button className={`px-2 py-1 text-xs ${theme==="light"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("light")}>明</button>
       <button className={`px-2 py-1 text-xs ${theme==="dark"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("dark")}>暗</button>
     </div>
+{/* Audio settings */}
+<div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+<details className="shrink-0">
+  <summary className="cursor-pointer px-2 py-1 text-xs border rounded bg-white dark:bg-slate-800">
+    録音設定
+  </summary>
+  <div className="absolute mt-1 p-2 bg-white dark:bg-slate-800 border rounded shadow">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-xs text-slate-600 dark:text-slate-300">サンプルレート</span>
+      <select value={sampleRate} onChange={(e)=>{setSampleRate(e.target.value as SampleRate); localStorage.setItem(AUDIO_SETTINGS_KEY+"_sr", e.target.value);}}
+        className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
+        <option value="44.1kHz">44.1kHz</option>
+        <option value="48kHz">48kHz</option>
+        <option value="96kHz">96kHz</option>
+      </select>
+    </div>
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-slate-600 dark:text-slate-300">ビット深度</span>
+      <select value={bitDepth} onChange={(e)=>{setBitDepth(e.target.value as BitDepth); localStorage.setItem(AUDIO_SETTINGS_KEY+"_bd", e.target.value);}}
+        className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
+        <option value="16bit">16bit</option>
+        <option value="24bit">24bit</option>
+        <option value="32bit float">32bit float</option>
+      </select>
+    </div>
+  </div>
+</details>
 
     {/* 右端：保存状態 */}
     <div className="ml-auto shrink-0">
@@ -783,7 +842,7 @@ useEffect(() => {
                   </select>
 
                   <div className="ml-auto hidden md:flex gap-2">
-                    <button className="h-9 px-3 rounded border bg-indigo-50 dark:bg-indigo-900/30" onClick={exportCSV}>
+                    <button className="h-9 px-3 rounded border bg-indigo-50 dark:bg-indigo-900/30" onClick={handleExportCSV}>
                       CSV出力
                     </button>
                     <button className="h-9 px-3 rounded border bg-teal-50 dark:bg-emerald-900/30" onClick={() => csvInputRef.current?.click()}>
@@ -987,7 +1046,7 @@ useEffect(() => {
 
                 {/* CSV (mobile) */}
                 <div className="mt-2 md:hidden flex gap-2">
-                  <button className="bg-indigo-600 text-white rounded px-3 py-2 w-full" onClick={exportCSV}>
+                  <button className="bg-indigo-600 text-white rounded px-3 py-2 w-full" onClick={handleExportCSV}>
                     CSV出力
                   </button>
                   <button className="bg-emerald-600 text-white rounded px-3 py-2 w-full" onClick={() => csvInputRef.current?.click()}>
@@ -1225,7 +1284,7 @@ useEffect(() => {
 
       {/* 9) CSV */}
       <div className="flex gap-2">
-        <button className="flex-1 h-10 text-xs border rounded bg-indigo-50 dark:bg-indigo-900/30" onClick={exportCSV}>CSV出力</button>
+        <button className="flex-1 h-10 text-xs border rounded bg-indigo-50 dark:bg-indigo-900/30" onClick={handleExportCSV}>CSV出力</button>
         <button className="flex-1 h-10 text-xs border rounded bg-emerald-50 dark:bg-emerald-900/30" onClick={()=>csvRef.current?.click()}>CSV取込</button>
         <input ref={csvRef} type="file" accept=".csv,text/csv" className="hidden"
           onChange={(e)=>{ const f=e.target.files?.[0]; if(f) importCSV(f); e.currentTarget.value=""; }} />
