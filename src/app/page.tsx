@@ -360,7 +360,7 @@ function AppInner() {
   // csv/json
   const csvInputRef = useRef<HTMLInputElement | null>(null);
   const jsonInputRef = useRef<HTMLInputElement | null>(null);
-
+  
   // draft
   const [draft, setDraft] = useState({
     fileNo: "",
@@ -373,6 +373,42 @@ function AppInner() {
     mics: ["", "", "", "", "", "", "", ""],
     note: "",
   });
+
+// === Undo / Redo 用スナップショット ===
+type Snapshot = { rows: typeof rows; draft: typeof draft };
+const past = useRef<Snapshot[]>([]);
+const future = useRef<Snapshot[]>([]);
+const [histTick, setHistTick] = useState(0);
+
+const snap = (): Snapshot => ({
+  rows: structuredClone(rows),
+  draft: structuredClone(draft),
+});
+const pushHistory = () => { past.current.push(snap()); future.current.length = 0; setHistTick(t=>t+1); };
+const undo = () => {
+  if (!past.current.length) return;
+  const prev = past.current.pop()!;
+  future.current.push(snap());
+  setRows(prev.rows); setDraft(prev.draft);
+  setHistTick(t=>t+1);
+};
+const redo = () => {
+  if (!future.current.length) return;
+  const nxt = future.current.pop()!;
+  past.current.push(snap());
+  setRows(nxt.rows); setDraft(nxt.draft);
+  setHistTick(t=>t+1);
+};
+
+// === 保存状態表示 ===
+const [saveState, setSaveState] = useState<"saving"|"saved">("saved");
+useEffect(() => {
+  setSaveState("saving");
+  try { localStorage.setItem("field-takes-data", JSON.stringify(rows)); } catch {}
+  const id = setTimeout(() => setSaveState("saved"), 300);
+  return () => clearTimeout(id);
+}, [rows]);
+
 
   // effects
   useEffect(() => {
@@ -455,6 +491,7 @@ function AppInner() {
 
   // CRUD rows
   function addRow() {
+    pushHistory();
     const sceneStr = combine(draft.sceneNum, draft.sceneSuffix as Suffix);
     const cutStr = combine(draft.cutNum, draft.cutSuffix as Suffix);
     const takeStr = String(draft.takeNum);
@@ -492,6 +529,7 @@ function AppInner() {
     });
   }
   function delRow(id: string) {
+    pushHistory();
     if (!confirm("削除しますか？")) return;
     setRows((p) => p.filter((r) => r.id !== id));
   }
@@ -516,6 +554,7 @@ function AppInner() {
   }
 
   function resetCounters() {
+    pushHistory();
     setDraft((d) => ({ ...d, sceneNum: 1, cutNum: 1, takeNum: 1 }));
   }
 
@@ -654,43 +693,55 @@ function AppInner() {
   return (
     <div className="bg-white dark:bg-slate-900 dark:text-slate-100 min-h-[100dvh]">
       <div className="min-h-[100dvh] bg-white dark:bg-slate-900 p-2 md:p-4 max-w-7xl mx-auto pb-28 md:pb-0">
-        {/* Top bar */}
-       {/* Top bar (sticky, wrap, safe text sizes) */}
-<div className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b mb-2">
-  <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 p-2">
-    <div className="flex items-center gap-2 flex-1 min-w-[280px]">
-      <span className="text-[11px] text-slate-500 dark:text-slate-400">プロジェクト</span>
-      <div className="flex items-center gap-1 flex-wrap">
-        <button className="h-8 px-2 text-xs border rounded bg-white dark:bg-slate-800 break-words"
-          onClick={openPicker}>
-          {projectName() || "未選択"}
-        </button>
-        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={() => createProject()}>新規</button>
-        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={renameProject}>名称</button>
-        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={duplicateProject}>複製</button>
-        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={exportProjectJSON}>JSON出</button>
-        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate" onClick={() => jsonInputRef.current?.click()}>JSON入</button>
-        <button className="h-8 px-2 text-xs border rounded whitespace-nowrap truncate border-rose-300 text-rose-700" onClick={deleteProject}>削除</button>
-      </div>
-      <input ref={jsonInputRef} type="file" accept="application/json" className="hidden"
-        onChange={(e) => { const f=e.target.files?.[0]; if(f) importProjectJSON(f); e.currentTarget.value=""; }} />
+        {/* Top bar (1行・横スクロール可) */}
+<div className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b">
+  <div className="max-w-7xl mx-auto px-2 py-2 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+    {/* 左側：プロジェクト操作 */}
+    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">プロジェクト</span>
+    <button className="h-8 px-2 text-xs border rounded shrink-0 bg-white dark:bg-slate-800" onClick={openPicker}>{projectName()||"未選択"}</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={() =>createProject}>新規</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={renameProject}>名称</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={duplicateProject}>複製</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={exportProjectJSON}>JSON出</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={()=>jsonInputRef.current?.click()}>JSON入</button>
+    <button className="h-8 px-2 text-xs border rounded border-rose-300 text-rose-700 shrink-0" onClick={deleteProject}>削除</button>
+    <input ref={jsonInputRef} type="file" accept="application/json" className="hidden"
+      onChange={(e)=>{ const f=e.target.files?.[0]; if(f) importProjectJSON(f); e.currentTarget.value=""; }} />
+
+    {/* 仕切り */}
+    <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+
+    {/* Undo / Redo */}
+    <button className="h-8 px-2 text-xs border rounded shrink-0 disabled:opacity-40"
+      onClick={undo} disabled={!past.current.length}>↶ 戻す</button>
+    <button className="h-8 px-2 text-xs border rounded shrink-0 disabled:opacity-40"
+      onClick={redo} disabled={!future.current.length}>進む ↷</button>
+
+    {/* 利き手・テーマ */}
+    <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">利き手</span>
+    <div className="rounded-lg border overflow-hidden shrink-0">
+      <button className={`px-2 py-1 text-xs ${hand==="left"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("left")}>左手</button>
+      <button className={`px-2 py-1 text-xs ${hand==="right"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("right")}>右手</button>
+    </div>
+    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">テーマ</span>
+    <div className="rounded-lg border overflow-hidden shrink-0">
+      <button className={`px-2 py-1 text-xs ${theme==="light"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("light")}>明</button>
+      <button className={`px-2 py-1 text-xs ${theme==="dark"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("dark")}>暗</button>
     </div>
 
-    <div className="ml-auto flex items-center gap-2">
-      <span className="text-[11px] text-slate-500 dark:text-slate-400">利き手</span>
-      <div className="rounded-lg border overflow-hidden">
-        <button className={`px-2 py-1 text-xs ${hand==="left"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("left")}>左手</button>
-        <button className={`px-2 py-1 text-xs ${hand==="right"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("right")}>右手</button>
-      </div>
-
-      <span className="ml-2 text-[11px] text-slate-500 dark:text-slate-400">テーマ</span>
-      <div className="rounded-lg border overflow-hidden">
-        <button className={`px-2 py-1 text-xs ${theme==="light"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("light")}>明</button>
-        <button className={`px-2 py-1 text-xs ${theme==="dark"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("dark")}>暗</button>
-      </div>
+    {/* 右端：保存状態 */}
+    <div className="ml-auto shrink-0">
+      <span className={`inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] border
+        ${saveState==="saving"
+          ? "border-amber-300 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200"
+          : "border-emerald-300 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200"}`}>
+        {saveState==="saving" ? "保存中…" : "✓ 保存済み"}
+      </span>
     </div>
   </div>
 </div>
+
 
         {/* Grid */}
         <div className={`grid ${gridCols} items-start gap-3 md:gap-5`}>
