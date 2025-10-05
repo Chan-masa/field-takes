@@ -653,7 +653,7 @@ function AppInner() {
 
   return (
     <div className="bg-white dark:bg-slate-900 dark:text-slate-100 min-h-[100dvh]">
-      <div className="p-2 md:p-4 max-w-7xl mx-auto pb-28 md:pb-0">
+      <div className="min-h-[100dvh] bg-white dark:bg-slate-900 p-2 md:p-4 max-w-7xl mx-auto pb-28 md:pb-0">
         {/* Top bar */}
        {/* Top bar (sticky, wrap, safe text sizes) */}
 <div className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b mb-2">
