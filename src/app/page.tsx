@@ -1007,22 +1007,16 @@ function AppInner() {
 
     <div className="max-w-7xl mx-auto max-h-[65vh] overflow-y-auto px-3 pb-3 space-y-3">
 
-      {/* 1) ファイル番号 */}
-      <div className="space-y-1">
-        <label className="text-xs text-slate-600 dark:text-slate-300">ファイル番号*</label>
-        <div className="flex gap-2">
-          <input
-            autoComplete="off"
-            value={draft.fileNo}
-            onChange={(e)=>setDraft({...draft, fileNo:e.target.value})}
-            className="flex-1 h-12 px-2 rounded border bg-white dark:bg-slate-700"
-          />
-          <button
-            className="px-3 h-12 rounded border bg-slate-50 dark:bg-slate-700 text-xs"
-            onClick={()=>setDraft(d=>({...d, fileNo: nextFileNo(rows)}))}
-          >次番</button>
-        </div>
-      </div>
+     {/* 1) ファイル番号 */}
+<div className="space-y-1">
+  <label className="text-xs text-slate-600 dark:text-slate-300">ファイル番号*</label>
+  <input
+    autoComplete="off"
+    value={draft.fileNo}
+    onChange={(e)=>setDraft({...draft, fileNo:e.target.value})}
+    className="w-full h-12 px-2 rounded border bg-white dark:bg-slate-700"
+  />
+</div>
 
       {/* 2) S# */}
       <div className="space-y-1">
