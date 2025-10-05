@@ -818,16 +818,23 @@ useEffect(() => {
                           <td className="px-2 py-1 border max-w-[260px] truncate" title={r.note}>
                             {r.note}
                           </td>
-                          <td className="px-2 py-1 border">
-                            <div className="flex gap-1">
-                              <button className="px-2 h-8 rounded border" onClick={() => editRow(r.id)}>
-                                編集
-                              </button>
-                              <button className="px-2 h-8 rounded border border-rose-300 text-rose-700" onClick={() => delRow(r.id)}>
-                                削除
-                              </button>
-                            </div>
-                          </td>
+                         <td className="px-2 py-1 border">
+  <div className="flex gap-1 justify-end">
+    <button
+      onClick={() => editRow(r.id)}
+      className="h-8 px-2 text-xs leading-none whitespace-nowrap border rounded bg-white dark:bg-slate-800 min-w-[56px]"
+    >
+      編集
+    </button>
+    <button
+      onClick={() => delRow(r.id)}
+      className="h-8 px-2 text-xs leading-none whitespace-nowrap border rounded border-rose-300 text-rose-700 min-w-[56px]"
+    >
+      削除
+    </button>
+  </div>
+</td>
+
                         </tr>
                       ))}
                       {filtered.length === 0 && (
