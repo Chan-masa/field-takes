@@ -999,10 +999,6 @@ useEffect(() => {
           <div className="fixed inset-0 bg-black/40 grid place-items-center z-50">
             <div className="w-[min(92vw,560px)] rounded-2xl bg-white dark:bg-slate-800 shadow-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">プロジェクトを選択</h2>
-                <button className="h-9 px-3 border rounded" onClick={() => createProject()}>
-                  新規作成
-                </button>
               </div>
               <div className="max-h-[50vh] overflow-auto border rounded-lg">
                 <table className="w-full text-sm">
