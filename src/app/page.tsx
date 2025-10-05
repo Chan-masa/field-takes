@@ -80,32 +80,12 @@ function formatDT(iso: string): string {
 
 // CSV helpers (per project)
 function toCSV(rows: TakeRow[]): string {
-  const headers = [
-    "createdAt",
-    "updatedAt",
-    "fileNo",
-    "sceneNo",
-    "cutNo",
-    "takeNo",
-    "status",
-    ...Array.from({ length: 8 }, (_, i) => `mic${i + 1}`),
-    "note",
-  ];
+  const headers = ["createdAt","fileNo","sceneNo","cutNo","takeNo","status", ...Array.from({ length: 8 }, (_, i) => `mic${i + 1}`),"note"];
   const esc = (s: unknown) => (s ?? "").toString().replaceAll('"', '""').replaceAll("\n", " ");
   return [headers.join(",")]
     .concat(
       rows.map((r) => {
-        const arr = [
-          r.createdAt,
-          r.updatedAt,
-          r.fileNo,
-          r.sceneNo,
-          r.cutNo,
-          r.takeNo,
-          r.status,
-          ...(r.mics || []).concat(Array(8).fill("")).slice(0, 8),
-          r.note || "",
-        ];
+        const arr = [r.createdAt, r.fileNo, r.sceneNo, r.cutNo, r.takeNo, r.status, ...(r.mics||[]).concat(Array(8).fill("")).slice(0,8), r.note||""];
         return arr.map((v) => `"${esc(v)}"`).join(",");
       })
     )
@@ -313,15 +293,6 @@ function Collapsible({
     </div>
   );
 }
-const [sampleRate, setSampleRate] = useState<SampleRate>(() => {
-  try { return (JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY) || "{}").sampleRate as SampleRate) || "48kHz"; } catch { return "48kHz"; }
-});
-const [bitDepth, setBitDepth] = useState<BitDepth>(() => {
-  try { return (JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY) || "{}").bitDepth  as BitDepth)  || "24bit"; } catch { return "24bit"; }
-});
-useEffect(() => {
-  try { localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify({ sampleRate, bitDepth })); } catch {}
-}, [sampleRate, bitDepth]);
 
 // ====== Storage helpers ======
 function loadProjects(): Project[] {
@@ -862,7 +833,7 @@ const handleExportCSV = () => {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
+                <div ref={sheetRef} className="overflow-x-auto overflow-y-auto max-h-[60vh]">
                   <table className="min-w-full border text-sm">
                     <thead className="bg-neutral-50 dark:bg-slate-700">
                       <tr>
