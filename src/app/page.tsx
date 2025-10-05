@@ -653,81 +653,44 @@ function AppInner() {
 
   return (
     <div className="bg-white dark:bg-slate-900 dark:text-slate-100 min-h-[100dvh]">
-      <div className="p-2 md:p-4 max-w-7xl mx-auto pb-20 md:pb-0">
+      <div className="p-2 md:p-4 max-w-7xl mx-auto pb-28 md:pb-0">
         {/* Top bar */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500 dark:text-slate-400">プロジェクト</span>
-            <div className="flex items-center gap-2">
-              <button className="h-8 px-3 border rounded bg-white dark:bg-slate-800" onClick={openPicker}>
-                {projectName() || "未選択"}
-              </button>
-              <button className="h-8 px-3 border rounded" onClick={() => createProject()}>
-                新規作成
-              </button>
-              <button className="h-8 px-3 border rounded" onClick={renameProject}>
-                名前変更
-              </button>
-              <button className="h-8 px-3 border rounded" onClick={duplicateProject}>
-                複製
-              </button>
-              <button className="h-8 px-3 border rounded" onClick={exportProjectJSON}>
-                JSON出力
-              </button>
-              <button className="h-8 px-3 border rounded" onClick={() => jsonInputRef.current?.click()}>
-                JSON取込
-              </button>
-              <input
-                ref={jsonInputRef}
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) importProjectJSON(f);
-                  e.currentTarget.value = "";
-                }}
-              />
-              <button className="h-8 px-3 border rounded border-rose-300 text-rose-700" onClick={deleteProject}>
-                削除
-              </button>
-            </div>
-          </div>
+       {/* Top bar (sticky, wrap, safe text sizes) */}
+<div className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b mb-2">
+  <div className="flex flex-wrap items-center gap-2 p-2">
+    <div className="flex items-center gap-2 flex-1 min-w-[280px]">
+      <span className="text-[11px] text-slate-500 dark:text-slate-400">プロジェクト</span>
+      <div className="flex items-center gap-1 flex-wrap">
+        <button className="h-8 px-2 text-xs border rounded bg-white dark:bg-slate-800 break-words"
+          onClick={openPicker}>
+          {projectName() || "未選択"}
+        </button>
+        <button className="h-8 px-2 text-xs border rounded" onClick={() => createProject()}>新規</button>
+        <button className="h-8 px-2 text-xs border rounded" onClick={renameProject}>名称</button>
+        <button className="h-8 px-2 text-xs border rounded" onClick={duplicateProject}>複製</button>
+        <button className="h-8 px-2 text-xs border rounded" onClick={exportProjectJSON}>JSON出</button>
+        <button className="h-8 px-2 text-xs border rounded" onClick={() => jsonInputRef.current?.click()}>JSON入</button>
+        <button className="h-8 px-2 text-xs border rounded border-rose-300 text-rose-700" onClick={deleteProject}>削除</button>
+      </div>
+      <input ref={jsonInputRef} type="file" accept="application/json" className="hidden"
+        onChange={(e) => { const f=e.target.files?.[0]; if(f) importProjectJSON(f); e.currentTarget.value=""; }} />
+    </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-xs text-slate-500 dark:text-slate-400">利き手</span>
-            <div className="rounded-lg border overflow-hidden">
-              <button
-                className={`px-3 py-1 text-sm ${hand === "left" ? "bg-slate-900 text-white" : "bg-white dark:bg-slate-800 dark:text-slate-100"}`}
-                onClick={() => setHand("left")}
-              >
-                左手
-              </button>
-              <button
-                className={`px-3 py-1 text-sm ${hand === "right" ? "bg-slate-900 text-white" : "bg-white dark:bg-slate-800 dark:text-slate-100"}`}
-                onClick={() => setHand("right")}
-              >
-                右手
-              </button>
-            </div>
+    <div className="ml-auto flex items-center gap-2">
+      <span className="text-[11px] text-slate-500 dark:text-slate-400">利き手</span>
+      <div className="rounded-lg border overflow-hidden">
+        <button className={`px-2 py-1 text-xs ${hand==="left"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("left")}>左手</button>
+        <button className={`px-2 py-1 text-xs ${hand==="right"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("right")}>右手</button>
+      </div>
 
-            <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">テーマ</span>
-            <div className="rounded-lg border overflow-hidden">
-              <button
-                className={`px-3 py-1 text-sm ${theme === "light" ? "bg-slate-900 text-white" : "bg-white dark:bg-slate-800 dark:text-slate-100"}`}
-                onClick={() => setTheme("light")}
-              >
-                明
-              </button>
-              <button
-                className={`px-3 py-1 text-sm ${theme === "dark" ? "bg-slate-900 text-white" : "bg-white dark:bg-slate-800 dark:text-slate-100"}`}
-                onClick={() => setTheme("dark")}
-              >
-                暗
-              </button>
-            </div>
-          </div>
-        </div>
+      <span className="ml-2 text-[11px] text-slate-500 dark:text-slate-400">テーマ</span>
+      <div className="rounded-lg border overflow-hidden">
+        <button className={`px-2 py-1 text-xs ${theme==="light"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("light")}>明</button>
+        <button className={`px-2 py-1 text-xs ${theme==="dark"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("dark")}>暗</button>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Grid */}
         <div className={`grid ${gridCols} items-start gap-3 md:gap-5`}>
@@ -1030,36 +993,135 @@ function AppInner() {
           </div>
         )}
 
-        {/* Mobile bottom action bar */}
-        <div className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75">
-          <div className="max-w-7xl mx-auto px-3 py-2 grid grid-cols-5 gap-2">
-            {(["OK", "NG", "KEEP"] as const).map((s) => {
-              const selected = draft.status === s;
-              const base =
-  s === "OK"
-    ? "border-emerald-300 bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-    : s === "NG"
-    ? "border-rose-300 bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
-    : "border-amber-300 bg-amber-100 dark:bg-amber-800 dark:text-amber-100";
+        {/* Mobile bottom dock: all controls */}
+<div className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75">
+  <details className="group">
+    <summary className="list-none cursor-pointer">
+      <div className="px-3 py-2 grid grid-cols-5 gap-2">
+        {(["OK","NG","KEEP"] as const).map((s)=> {
+          const selected = draft.status===s;
+          const base =
+            s==="OK" ? "border-emerald-300 bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+          : s==="NG" ? "border-rose-300 bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
+          :            "border-amber-300 bg-amber-100 dark:bg-amber-800 dark:text-amber-100";
+          return (
+            <button key={s}
+              onClick={()=>setDraft({...draft, status:s})}
+              className={`h-11 text-xs border rounded ${base} ${selected?"ring-2 ring-indigo-400":""}`}>
+              {s}
+            </button>
+          );
+        })}
+        <button onClick={resetCounters} className="h-11 text-xs bg-red-600 text-white hover:bg-red-700 rounded">リセット</button>
+        <button onClick={addRow} className="h-11 text-xs bg-indigo-600 text-white hover:bg-indigo-700 rounded col-span-2">追加</button>
+      </div>
+      <div className="px-3 pb-2 -mt-1 text-center text-[11px] text-slate-500 dark:text-slate-300">
+        ▼ 展開（S#/C#/T#・ファイルNo・サフィックス・CSV）
+      </div>
+    </summary>
 
+    <div className="max-h-[60vh] overflow-y-auto px-3 pb-3 space-y-3">
+      {/* ファイル番号 */}
+      <div className="space-y-1">
+        <label className="text-xs text-slate-600 dark:text-slate-300">ファイル番号*</label>
+        <div className="flex gap-2">
+          <input
+            autoComplete="off"
+            value={draft.fileNo}
+            onChange={(e)=>setDraft({...draft, fileNo:e.target.value})}
+            className="flex-1 h-11 px-2 rounded border bg-white dark:bg-slate-700"
+          />
+          <button
+            className="px-3 h-11 rounded border bg-slate-50 dark:bg-slate-700 text-xs"
+            onClick={()=>setDraft(d=>({...d, fileNo: nextFileNo(rows)}))}
+          >次番</button>
+        </div>
+      </div>
+
+      {/* S# / C# / T# */}
+      <div className="grid grid-cols-3 gap-2">
+        {/* S# */}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">S#</label>
+          <div className="flex items-center gap-1">
+            <button className="h-12 w-12 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+              onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-1))}>−</button>
+            <div className="h-12 flex-1 min-w-[64px] grid place-items-center text-lg border rounded-xl select-none bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100">
+              {draft.sceneNum}
+            </div>
+            <button className="h-12 w-12 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+              onClick={()=>setSceneNum(draft.sceneNum+1)}>＋</button>
+          </div>
+          <div className="flex gap-1">
+            <button className="h-9 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100" onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-5))}>−5</button>
+            <button className="h-9 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100" onClick={()=>setSceneNum(draft.sceneNum+5)}>+5</button>
+          </div>
+          <div className="flex items-center gap-1 flex-wrap">
+            {SUFFIXES.map(s=>{
+              const sel = draft.sceneSuffix===s;
+              const base = s===""
+                ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+                : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
               return (
-                <button
-                  key={s}
-                  onClick={() => setDraft({ ...draft, status: s })}
-                  className={`h-10 text-xs border rounded ${base} ${selected ? "ring-2 ring-indigo-400" : ""}`}
-                >
-                  {s}
-                </button>
+                <button key={"s"+(s||"none")} className={`h-8 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
+                  onClick={()=>setDraft(d=>({...d, sceneSuffix:s}))}>{s===""?"なし":s}</button>
               );
             })}
-            <button onClick={resetCounters} className="h-10 text-xs bg-red-600 text-white hover:bg-red-700 rounded">
-              リセット
-            </button>
-            <button onClick={addRow} className="h-10 text-xs bg-indigo-600 text-white hover:bg-indigo-700 rounded col-span-2">
-              追加
-            </button>
           </div>
         </div>
+
+        {/* C# */}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
+          <div className="flex items-center gap-1">
+            <button className="h-12 w-12 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+              onClick={()=>setCutNum(Math.max(0, draft.cutNum-1))}>−</button>
+            <div className="h-12 flex-1 min-w-[64px] grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
+              {draft.cutNum}
+            </div>
+            <button className="h-12 w-12 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+              onClick={()=>setCutNum(draft.cutNum+1)}>＋</button>
+          </div>
+          <div className="flex items-center gap-1 flex-wrap">
+            {SUFFIXES.map(s=>{
+              const sel = draft.cutSuffix===s;
+              const base = s===""
+                ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+                : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
+              return (
+                <button key={"c"+(s||"none")} className={`h-8 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
+                  onClick={()=>setDraft(d=>({...d, cutSuffix:s}))}>{s===""?"なし":s}</button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* T# */}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-rose-900 dark:text-rose-100">T#</label>
+          <div className="flex items-center gap-1">
+            <button className="h-12 w-12 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
+              onClick={()=>setDraft(d=>({...d, takeNum: Math.max(1, d.takeNum-1)}))}>−</button>
+            <div className="h-12 flex-1 min-w-[64px] grid place-items-center text-lg border rounded-xl select-none bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 text-rose-900 dark:text-rose-100">
+              {draft.takeNum}
+            </div>
+            <button className="h-12 w-12 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
+              onClick={()=>setDraft(d=>({...d, takeNum: d.takeNum+1}))}>＋</button>
+          </div>
+        </div>
+      </div>
+
+      {/* CSV */}
+      <div className="flex gap-2">
+        <button className="flex-1 h-10 text-xs border rounded bg-indigo-50 dark:bg-indigo-900/30" onClick={exportCSV}>CSV出力</button>
+        <button className="flex-1 h-10 text-xs border rounded bg-emerald-50 dark:bg-emerald-900/30" onClick={()=>csvRef.current?.click()}>CSV取込</button>
+        <input ref={csvRef} type="file" accept=".csv,text/csv" className="hidden"
+          onChange={(e)=>{ const f=e.target.files?.[0]; if(f) importCSV(f); e.currentTarget.value=""; }} />
+      </div>
+    </div>
+  </details>
+</div>
+
       </div>
 
       {/* Hidden file inputs (fallback) */}
