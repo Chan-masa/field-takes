@@ -1026,18 +1026,33 @@ function AppInner() {
 
       {/* 2) S# */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">S#</label>
-        <div className="flex items-center gap-2">
-          <button className="h-12 w-14 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-            onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-1))}>−</button>
-          <div className="h-12 min-w-[72px] flex-1 grid place-items-center text-lg border rounded-xl select-none bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100">
-            {draft.sceneNum}
-          </div>
-          <button className="h-12 w-14 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-            onClick={()=>setSceneNum(draft.sceneNum+1)}>＋</button>
-          <button className="h-10 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100" onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-5))}>−5</button>
-          <button className="h-10 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100" onClick={()=>setSceneNum(draft.sceneNum+5)}>+5</button>
-        </div>
+  <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">S#</label>
+  <div className="flex items-center gap-2">
+    {/* -5 を - の左に */}
+    <button
+      className="h-10 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+      onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-5))}
+    >−5</button>
+
+    <button
+      className="h-12 w-14 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+      onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-1))}
+    >−</button>
+
+    <div className="h-12 min-w-[72px] flex-1 grid place-items-center text-lg border rounded-xl select-none bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100">
+      {draft.sceneNum}
+    </div>
+
+    <button
+      className="h-12 w-14 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+      onClick={()=>setSceneNum(draft.sceneNum+1)}
+    >＋</button>
+
+    <button
+      className="h-10 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+      onClick={()=>setSceneNum(draft.sceneNum+5)}
+    >+5</button>
+  </div>
         {/* サフィックス */}
         <div className="flex items-center gap-1 flex-wrap">
           {SUFFIXES.map(s=>{
