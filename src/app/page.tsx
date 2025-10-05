@@ -399,6 +399,10 @@ const redo = () => {
   setRows(nxt.rows); setDraft(nxt.draft);
   setHistTick(t=>t+1);
 };
+// 自動スクロール用
+const sheetRef = useRef<HTMLDivElement | null>(null);     // シート全体のスクロール容器
+const endRef = useRef<HTMLDivElement | null>(null);       // 最後尾の目印
+const scrollToEndNext = useRef(false);                    // 追加直後だけスクロールするフラグ
 
 // === 保存状態表示 ===
 const [saveState, setSaveState] = useState<"saving"|"saved">("saved");
@@ -423,6 +427,13 @@ useEffect(() => {
       localStorage.setItem(HANDEDNESS_KEY, hand);
     } catch {}
   }, [hand]);
+  
+useEffect(() => {
+  if (!scrollToEndNext.current) return;
+  scrollToEndNext.current = false;
+  const el = sheetRef.current;
+  if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+}, [rows]);
 
   useEffect(() => {
     const ps = loadProjects();
@@ -492,6 +503,7 @@ useEffect(() => {
   // CRUD rows
   function addRow() {
     pushHistory();
+    scrollToEndNext.current = true; 
     const sceneStr = combine(draft.sceneNum, draft.sceneSuffix as Suffix);
     const cutStr = combine(draft.cutNum, draft.cutSuffix as Suffix);
     const takeStr = String(draft.takeNum);
@@ -788,7 +800,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto　overflow-y-auto max-h-[60vh]">
                   <table className="min-w-full border text-sm">
                     <thead className="bg-neutral-50 dark:bg-slate-700">
                       <tr>
@@ -844,6 +856,7 @@ useEffect(() => {
                           </td>
                         </tr>
                       )}
+                      <tr><td colSpan={999}><div ref={endRef} /></td></tr>
                     </tbody>
                   </table>
                 </div>
