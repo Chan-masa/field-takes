@@ -747,10 +747,6 @@ const handleExportCSV = () => {
 <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={()=>jsonInputRef.current?.click()}>JSON入</button>
 <button className="h-8 px-2 text-xs border rounded border-rose-300 text-rose-700 shrink-0" onClick={deleteProject}>削除</button>
 
-    {/* 仕切り */}
-    <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
-
-
     {/* 利き手・テーマ */}
     <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
     <div className="rounded-lg border overflow-hidden shrink-0">
