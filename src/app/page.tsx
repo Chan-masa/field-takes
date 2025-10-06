@@ -35,6 +35,8 @@ interface Project {
   updatedAt: string;
   rows: TakeRow[];
 }
+type UIMode = "desktop" | "mobile";
+const UIMODE_KEY = "field_ui_mode_v1";
 
 // ====== Keys ======
 const PROJECTS_KEY = "field_projects_v1";
@@ -332,6 +334,15 @@ function AppInner() {
   const [hand, setHand] = useState<Hand>(
     (typeof window !== "undefined" && (localStorage.getItem(HANDEDNESS_KEY) as Hand)) || "right"
   );
+const [uiMode, setUiMode] = useState<UIMode>(
+  (typeof window !== "undefined" && (localStorage.getItem(UIMODE_KEY) as UIMode)) || "desktop"
+);
+useEffect(() => {
+  try { localStorage.setItem(UIMODE_KEY, uiMode); } catch {}
+}, [uiMode]);
+
+// 以降で使うフラグ
+const isMobileMode = uiMode === "mobile";
 
   // projects
   const [projects, setProjects] = useState<Project[]>([]);
@@ -475,7 +486,12 @@ useEffect(() => {
   // computed
   const sceneDisplay = combine(draft.sceneNum, draft.sceneSuffix as Suffix);
   const cutDisplay = combine(draft.cutNum, draft.cutSuffix as Suffix);
-  const gridCols = hand === "right" ? "md:grid-cols-[minmax(0,1fr)_420px]" : "md:grid-cols-[420px_minmax(0,1fr)]";
+  const gridCols = isMobileMode
+  ? "grid-cols-1"
+  : hand === "right"
+    ? "md:grid-cols-[minmax(0,1fr)_420px]"
+    : "md:grid-cols-[420px_minmax(0,1fr)]";
+
   const listColStart = hand === "right" ? "md:col-start-1" : "md:col-start-2";
   const panelColStart = hand === "right" ? "md:col-start-2" : "md:col-start-1";
 
@@ -747,6 +763,24 @@ const handleExportCSV = () => {
       <button className={`px-2 py-1 text-xs ${theme==="light"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("light")}>明</button>
       <button className={`px-2 py-1 text-xs ${theme==="dark"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("dark")}>暗</button>
     </div>
+
+    <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+<span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">表示</span>
+<div className="rounded-lg border overflow-hidden shrink-0">
+  <button
+    className={`px-2 py-1 text-xs ${uiMode==="desktop"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`}
+    onClick={()=>setUiMode("desktop")}
+  >
+    デスクトップ
+  </button>
+  <button
+    className={`px-2 py-1 text-xs ${uiMode==="mobile"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`}
+    onClick={()=>setUiMode("mobile")}
+  >
+    スマホ
+  </button>
+</div>
+
 {/* Audio settings */}
 <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
 <details className="shrink-0">
@@ -793,7 +827,7 @@ const handleExportCSV = () => {
           {/* List */}
           <div className={`${listColStart} md:row-start-1`}>
             <div className="rounded-xl border bg-white/90 dark:bg-slate-800/90">
-              <div className="p-3 space-y-2">
+              <div className={`p-3 space-y-2 ${isMobileMode ? "pb-40" : ""}`}>
                 <div className="flex gap-2 items-center">
                   <input
                     placeholder="キーワード検索"
@@ -898,7 +932,7 @@ const handleExportCSV = () => {
           </div>
 
           {/* Controls */}
-          <aside className={`${panelColStart} md:row-start-1 md:self-start md:sticky md:top-2 h-fit hidden md:block`}>
+          <aside className={`${panelColStart} md:row-start-1 md:self-start md:sticky md:top-2 h-fit ${isMobileMode ? "hidden" : "block"}`}>
             <div className="rounded-xl border shadow-md bg-white/90 dark:bg-slate-800/90">
               <div className="p-3 space-y-3">
                 <div className="grid grid-cols-2 gap-2 items-end">
@@ -1094,7 +1128,7 @@ const handleExportCSV = () => {
         )}
 
        {/* Mobile bottom dock: all controls in ordered sections */}
-<div className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75">
+<div className={`${isMobileMode ? "" : "hidden"} fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75`}>
   <details className="group">
     <summary className="list-none cursor-pointer">
      <div className="max-w-7xl mx-auto px-3 py-2 grid grid-cols-5 gap-2">
