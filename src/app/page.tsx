@@ -783,31 +783,34 @@ const handleExportCSV = () => {
 
 {/* Audio settings */}
 <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
-<details className="shrink-0">
-  <summary className="cursor-pointer px-2 py-1 text-xs border rounded bg-white dark:bg-slate-800">
-    録音設定
-  </summary>
-  <div className="absolute mt-1 p-2 bg-white dark:bg-slate-800 border rounded shadow">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="text-xs text-slate-600 dark:text-slate-300">サンプルレート</span>
-      <select value={sampleRate} onChange={(e)=>{setSampleRate(e.target.value as SampleRate); localStorage.setItem(AUDIO_SETTINGS_KEY+"_sr", e.target.value);}}
-        className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
-        <option value="44.1kHz">44.1kHz</option>
-        <option value="48kHz">48kHz</option>
-        <option value="96kHz">96kHz</option>
-      </select>
+<div className="relative shrink-0">
+  <details>
+    <summary className="cursor-pointer px-2 py-1 text-xs border rounded bg-white dark:bg-slate-800">
+      録音設定
+    </summary>
+    {/* トリガのすぐ下に出す */}
+    <div className="absolute left-0 top-[calc(100%+4px)] z-50 p-2 bg-white dark:bg-slate-800 border rounded shadow">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xs text-slate-600 dark:text-slate-300">サンプルレート</span>
+        <select value={sampleRate} onChange={(e)=>{setSampleRate(e.target.value as any); localStorage.setItem(AUDIO_SETTINGS_KEY+"_sr", e.target.value);}}
+          className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
+          <option value="44.1kHz">44.1kHz</option>
+          <option value="48kHz">48kHz</option>
+          <option value="96kHz">96kHz</option>
+        </select>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-slate-600 dark:text-slate-300">ビット深度</span>
+        <select value={bitDepth} onChange={(e)=>{setBitDepth(e.target.value as any); localStorage.setItem(AUDIO_SETTINGS_KEY+"_bd", e.target.value);}}
+          className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
+          <option value="16bit">16bit</option>
+          <option value="24bit">24bit</option>
+          <option value="32bit float">32bit float</option>
+        </select>
+      </div>
     </div>
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-slate-600 dark:text-slate-300">ビット深度</span>
-      <select value={bitDepth} onChange={(e)=>{setBitDepth(e.target.value as BitDepth); localStorage.setItem(AUDIO_SETTINGS_KEY+"_bd", e.target.value);}}
-        className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
-        <option value="16bit">16bit</option>
-        <option value="24bit">24bit</option>
-        <option value="32bit float">32bit float</option>
-      </select>
-    </div>
-  </div>
-</details>
+  </details>
+</div>
 
     {/* 右端：保存状態 */}
     <div className="ml-auto shrink-0">
@@ -827,7 +830,7 @@ const handleExportCSV = () => {
           {/* List */}
           <div className={`${listColStart} md:row-start-1`}>
             <div className="rounded-xl border bg-white/90 dark:bg-slate-800/90">
-              <div className={`p-3 space-y-2 ${isMobileMode ? "pb-40" : ""}`}>
+              <div className={`p-3 space-y-2 ${isMobileMode ? "pb-[36vh]" : ""}`}>
                 <div className="flex gap-2 items-center">
                   <input
                     placeholder="キーワード検索"
@@ -1127,61 +1130,50 @@ const handleExportCSV = () => {
           </div>
         )}
 
-       {/* Mobile bottom dock: all controls in ordered sections */}
-<div className={`${isMobileMode ? "" : "hidden"} fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75`}>
+       {/* Mobile bottom dock: compact 1/3 screen */}
+<div className={`${isMobileMode ? "" : "hidden"} fixed inset-x-0 bottom-0 z-40 border-t
+                bg-white/95 dark:bg-slate-800/95 backdrop-blur supports-[backdrop-filter]:bg-white/75`}>
   <details className="group">
     <summary className="list-none cursor-pointer">
-     <div className="max-w-7xl mx-auto px-3 py-2 grid grid-cols-5 gap-2">
-    ...
+  <div className="max-w-7xl mx-auto px-3 py-1 grid grid-cols-6 gap-2 text-xs">
+    <span className="col-span-2 text-slate-500 dark:text-slate-300 truncate">
+      {projectName() || "未選択"}
+    </span>
+    <span className="col-span-2 text-center">{draft.fileNo || "ファイル番号"}</span>
+    <span className="col-span-2 text-right text-slate-500 dark:text-slate-300">▽ 開く</span>
   </div>
-  <div className="max-w-7xl mx-auto px-3 pb-2 -mt-1 text-center text-[11px] text-slate-500 dark:text-slate-300">
-    ▼ 展開
-  </div>
-    </summary>
+</summary>
 
-    <div className="max-w-7xl mx-auto max-h-[65vh] overflow-y-auto px-3 pb-3 space-y-3">
-
-     {/* 1) ファイル番号 */}
-<div className="space-y-1">
-  <label className="text-xs text-slate-600 dark:text-slate-300">ファイル番号*</label>
-  <input
-    autoComplete="off"
-    value={draft.fileNo}
-    onChange={(e)=>setDraft({...draft, fileNo:e.target.value})}
-    className="w-full h-12 px-2 rounded border bg-white dark:bg-slate-700"
-  />
-</div>
+    {/* 中身を最大33vhに抑える */}
+    <div className="max-w-7xl mx-auto max-h-[33vh] overflow-y-auto px-3 pb-2 space-y-2 text-[13px]">
+      {/* 1) ファイル番号 */}
+      <div className="space-y-1">
+        <label className="text-xs text-slate-600 dark:text-slate-300">ファイル番号*</label>
+        <input
+          autoComplete="off"
+          value={draft.fileNo}
+          onChange={(e)=>setDraft({...draft, fileNo:e.target.value})}
+          className="w-full h-10 px-2 rounded border bg-white dark:bg-slate-700"
+        />
+      </div>
 
       {/* 2) S# */}
       <div className="space-y-1">
-  <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">S#</label>
-  <div className="flex items-center gap-2">
-    {/* -5 を - の左に */}
-    <button
-      className="h-10 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-5))}
-    >−5</button>
-
-    <button
-      className="h-12 w-14 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={()=>setSceneNum(Math.max(0, draft.sceneNum-1))}
-    >−</button>
-
-    <div className="h-12 min-w-[72px] flex-1 grid place-items-center text-lg border rounded-xl select-none bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100">
-      {draft.sceneNum}
-    </div>
-
-    <button
-      className="h-12 w-14 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={()=>setSceneNum(draft.sceneNum+1)}
-    >＋</button>
-
-    <button
-      className="h-10 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={()=>setSceneNum(draft.sceneNum+5)}
-    >+5</button>
-  </div>
-        {/* サフィックス */}
+        <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">S#</label>
+        <div className="flex items-center gap-2">
+          <button className="h-9 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+            onClick={()=>setSceneNum(Math.max(1, draft.sceneNum-5))}>−5</button>
+          <button className="h-10 w-12 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+            onClick={()=>setSceneNum(Math.max(1, draft.sceneNum-1))}>−</button>
+          <div className="h-10 min-w-[64px] flex-1 grid place-items-center text-base border rounded-xl select-none
+                          bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100">
+            {draft.sceneNum}
+          </div>
+          <button className="h-10 w-12 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+            onClick={()=>setSceneNum(draft.sceneNum+1)}>＋</button>
+          <button className="h-9 px-2 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
+            onClick={()=>setSceneNum(draft.sceneNum+5)}>+5</button>
+        </div>
         <div className="flex items-center gap-1 flex-wrap">
           {SUFFIXES.map(s=>{
             const sel = draft.sceneSuffix===s;
@@ -1189,7 +1181,7 @@ const handleExportCSV = () => {
               ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
               : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
             return (
-              <button key={"s"+(s||"none")} className={`h-9 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
+              <button key={"s"+(s||"none")} className={`h-8 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
                 onClick={()=>setDraft(d=>({...d, sceneSuffix:s}))}>{s===""?"なし":s}</button>
             );
           })}
@@ -1200,15 +1192,15 @@ const handleExportCSV = () => {
       <div className="space-y-1">
         <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
         <div className="flex items-center gap-2">
-          <button className="h-12 w-14 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-            onClick={()=>setCutNum(Math.max(0, draft.cutNum-1))}>−</button>
-          <div className="h-12 min-w-[72px] flex-1 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
+          <button className="h-10 w-12 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+            onClick={()=>setCutNum(Math.max(1, draft.cutNum-1))}>−</button>
+          <div className="h-10 min-w-[64px] flex-1 grid place-items-center text-base border rounded-xl select-none
+                          bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
             {draft.cutNum}
           </div>
-          <button className="h-12 w-14 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+          <button className="h-10 w-12 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
             onClick={()=>setCutNum(draft.cutNum+1)}>＋</button>
         </div>
-        {/* サフィックス */}
         <div className="flex items-center gap-1 flex-wrap">
           {SUFFIXES.map(s=>{
             const sel = draft.cutSuffix===s;
@@ -1216,7 +1208,7 @@ const handleExportCSV = () => {
               ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
               : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
             return (
-              <button key={"c"+(s||"none")} className={`h-9 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
+              <button key={"c"+(s||"none")} className={`h-8 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
                 onClick={()=>setDraft(d=>({...d, cutSuffix:s}))}>{s===""?"なし":s}</button>
             );
           })}
@@ -1227,17 +1219,18 @@ const handleExportCSV = () => {
       <div className="space-y-1">
         <label className="text-xs font-semibold text-rose-900 dark:text-rose-100">T#</label>
         <div className="flex items-center gap-2">
-          <button className="h-12 w-14 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
+          <button className="h-10 w-12 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
             onClick={()=>setDraft(d=>({...d, takeNum: Math.max(1, d.takeNum-1)}))}>−</button>
-          <div className="h-12 min-w-[72px] flex-1 grid place-items-center text-lg border rounded-xl select-none bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 text-rose-900 dark:text-rose-100">
+          <div className="h-10 min-w-[64px] flex-1 grid place-items-center text-base border rounded-xl select-none
+                          bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 text-rose-900 dark:text-rose-100">
             {draft.takeNum}
           </div>
-          <button className="h-12 w-14 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
+          <button className="h-10 w-12 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
             onClick={()=>setDraft(d=>({...d, takeNum: d.takeNum+1}))}>＋</button>
         </div>
       </div>
 
-      {/* 5) ステータス（OK/NG/KEEP） */}
+      {/* 5) ステータス */}
       <div className="grid grid-cols-3 gap-2">
         {(["OK","NG","KEEP"] as const).map((s)=>{
           const selected = draft.status===s;
@@ -1248,7 +1241,7 @@ const handleExportCSV = () => {
           return (
             <button key={s}
               onClick={()=>setDraft({...draft, status:s})}
-              className={`h-12 text-sm border rounded ${base} ${selected?"ring-2 ring-indigo-400":""}`}>
+              className={`h-10 text-sm border rounded ${base} ${selected?"ring-2 ring-indigo-400":""}`}>
               {s}
             </button>
           );
@@ -1257,20 +1250,20 @@ const handleExportCSV = () => {
 
       {/* 6) 追加 / リセット */}
       <div className="grid grid-cols-3 gap-2">
-        <button onClick={resetCounters} className="h-12 text-sm bg-red-600 text-white hover:bg-red-700 rounded col-span-1">リセット</button>
-        <button onClick={addRow} className="h-12 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded col-span-2">追加</button>
+        <button onClick={resetCounters} className="h-10 text-sm bg-red-600 text-white hover:bg-red-700 rounded col-span-1">リセット</button>
+        <button onClick={addRow} className="h-10 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded col-span-2">追加</button>
       </div>
 
       {/* 7) CH1〜8 */}
-      <div className="rounded-xl border bg-white/90 dark:bg-slate-800/90 p-3">
+      <div className="rounded-xl border bg-white/90 dark:bg-slate-800/90 p-2">
         <div className="grid grid-cols-2 gap-2">
           {draft.mics.map((m,i)=>(
             <div key={i} className="space-y-1">
-              <label className="text-xs text-slate-600 dark:text-slate-300">CH{i+1}</label>
+              <label className="text-[11px] text-slate-600 dark:text-slate-300">CH{i+1}</label>
               <input
                 value={m}
                 onChange={(e)=>{ const a=[...draft.mics]; a[i]=e.target.value; setDraft({...draft, mics:a}); }}
-                className="h-10 px-2 rounded border w-full bg-white dark:bg-slate-700"
+                className="h-9 px-2 rounded border w-full bg-white dark:bg-slate-700"
               />
             </div>
           ))}
@@ -1278,23 +1271,22 @@ const handleExportCSV = () => {
       </div>
 
       {/* 8) 備考 */}
-      <div className="rounded-xl border bg-white/90 dark:bg-slate-800/90 p-3">
-        <label className="text-xs text-slate-600 dark:text-slate-300">備考</label>
+      <div className="rounded-xl border bg-white/90 dark:bg-slate-800/90 p-2">
+        <label className="text-[11px] text-slate-600 dark:text-slate-300">備考</label>
         <textarea
           value={draft.note || ""}
           onChange={(e)=>setDraft({...draft, note:e.target.value})}
-          className="mt-1 h-24 w-full px-2 py-1 rounded border bg-white dark:bg-slate-700"
+          className="mt-1 h-20 w-full px-2 py-1 rounded border bg-white dark:bg-slate-700"
         />
       </div>
 
       {/* 9) CSV */}
       <div className="flex gap-2">
-        <button className="flex-1 h-10 text-xs border rounded bg-indigo-50 dark:bg-indigo-900/30" onClick={handleExportCSV}>CSV出力</button>
-        <button className="flex-1 h-10 text-xs border rounded bg-emerald-50 dark:bg-emerald-900/30" onClick={()=>csvRef.current?.click()}>CSV取込</button>
+        <button className="flex-1 h-9 text-xs border rounded bg-indigo-50 dark:bg-indigo-900/30" onClick={handleExportCSV}>CSV出力</button>
+        <button className="flex-1 h-9 text-xs border rounded bg-emerald-50 dark:bg-emerald-900/30" onClick={()=>csvRef.current?.click()}>CSV取込</button>
         <input ref={csvRef} type="file" accept=".csv,text/csv" className="hidden"
           onChange={(e)=>{ const f=e.target.files?.[0]; if(f) importCSV(f); e.currentTarget.value=""; }} />
       </div>
-
     </div>
   </details>
 </div>
