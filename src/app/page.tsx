@@ -739,7 +739,6 @@ const handleExportCSV = () => {
 <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
 
 {/* 左側：プロジェクト操作 */}
-<span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">プロジェクト</span>
 <button className="h-8 px-2 text-xs border rounded shrink-0 bg-white dark:bg-slate-800" onClick={openPicker}>{projectName()||"未選択"}</button>
 <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={() => createProject()}>新規</button>
 <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={renameProject}>名称</button>
@@ -754,19 +753,16 @@ const handleExportCSV = () => {
 
     {/* 利き手・テーマ */}
     <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
-    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">利き手</span>
     <div className="rounded-lg border overflow-hidden shrink-0">
       <button className={`px-2 py-1 text-xs ${hand==="left"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("left")}>左手</button>
       <button className={`px-2 py-1 text-xs ${hand==="right"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setHand("right")}>右手</button>
     </div>
-    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">テーマ</span>
     <div className="rounded-lg border overflow-hidden shrink-0">
       <button className={`px-2 py-1 text-xs ${theme==="light"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("light")}>明</button>
       <button className={`px-2 py-1 text-xs ${theme==="dark"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`} onClick={()=>setTheme("dark")}>暗</button>
     </div>
 
     <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
-<span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">表示</span>
 <div className="rounded-lg border overflow-hidden shrink-0">
   <button
     className={`px-2 py-1 text-xs ${uiMode==="desktop"?"bg-slate-900 text-white":"bg-white dark:bg-slate-800 dark:text-slate-100"}`}
