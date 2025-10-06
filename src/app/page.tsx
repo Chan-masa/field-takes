@@ -730,26 +730,27 @@ const handleExportCSV = () => {
         {/* Top bar (1行・横スクロール可) */}
 <div className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b">
   <div className="max-w-7xl mx-auto px-2 py-2 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-    {/* 左側：プロジェクト操作 */}
-    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">プロジェクト</span>
-    <button className="h-8 px-2 text-xs border rounded shrink-0 bg-white dark:bg-slate-800" onClick={openPicker}>{projectName()||"未選択"}</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={() => createProject()}>新規</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={renameProject}>名称</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={duplicateProject}>複製</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={exportProjectJSON}>JSON出</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0" onClick={()=>jsonInputRef.current?.click()}>JSON入</button>
-    <button className="h-8 px-2 text-xs border rounded border-rose-300 text-rose-700 shrink-0" onClick={deleteProject}>削除</button>
-    <input ref={jsonInputRef} type="file" accept="application/json" className="hidden"
-      onChange={(e)=>{ const f=e.target.files?.[0]; if(f) importProjectJSON(f); e.currentTarget.value=""; }} />
+    {/* Undo / Redo を一番左へ */}
+<button className="h-8 px-2 text-xs border rounded shrink-0 disabled:opacity-40"
+  onClick={undo} disabled={!past.current.length}>↶ 戻る</button>
+<button className="h-8 px-2 text-xs border rounded shrink-0 disabled:opacity-40"
+  onClick={redo} disabled={!future.current.length}>進む ↷</button>
+
+<div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
+
+{/* 左側：プロジェクト操作 */}
+<span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">プロジェクト</span>
+<button className="h-8 px-2 text-xs border rounded shrink-0 bg-white dark:bg-slate-800" onClick={openPicker}>{projectName()||"未選択"}</button>
+<button className="h-8 px-2 text-xs border rounded shrink-0" onClick={() => createProject()}>新規</button>
+<button className="h-8 px-2 text-xs border rounded shrink-0" onClick={renameProject}>名称</button>
+<button className="h-8 px-2 text-xs border rounded shrink-0" onClick={duplicateProject}>複製</button>
+<button className="h-8 px-2 text-xs border rounded shrink-0" onClick={exportProjectJSON}>JSON出</button>
+<button className="h-8 px-2 text-xs border rounded shrink-0" onClick={()=>jsonInputRef.current?.click()}>JSON入</button>
+<button className="h-8 px-2 text-xs border rounded border-rose-300 text-rose-700 shrink-0" onClick={deleteProject}>削除</button>
 
     {/* 仕切り */}
     <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
 
-    {/* Undo / Redo */}
-    <button className="h-8 px-2 text-xs border rounded shrink-0 disabled:opacity-40"
-      onClick={undo} disabled={!past.current.length}>↶ 戻す</button>
-    <button className="h-8 px-2 text-xs border rounded shrink-0 disabled:opacity-40"
-      onClick={redo} disabled={!future.current.length}>進む ↷</button>
 
     {/* 利き手・テーマ */}
     <div className="mx-1 w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0" />
@@ -788,12 +789,16 @@ const handleExportCSV = () => {
     <summary className="cursor-pointer px-2 py-1 text-xs border rounded bg-white dark:bg-slate-800">
       録音設定
     </summary>
-    {/* トリガのすぐ下に出す */}
-    <div className="absolute left-0 top-[calc(100%+4px)] z-50 p-2 bg-white dark:bg-slate-800 border rounded shadow">
+    {/* ここを absolute → fixed にして最前面へ */}
+    <div className="fixed z-[100] left-2 top-[56px] p-2 border rounded shadow
+                    bg-white dark:bg-slate-800">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-xs text-slate-600 dark:text-slate-300">サンプルレート</span>
-        <select value={sampleRate} onChange={(e)=>{setSampleRate(e.target.value as any); localStorage.setItem(AUDIO_SETTINGS_KEY+"_sr", e.target.value);}}
-          className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
+        <select
+          value={sampleRate}
+          onChange={(e)=>{ setSampleRate(e.target.value as any); localStorage.setItem(AUDIO_SETTINGS_KEY+"_sr", e.target.value); }}
+          className="h-7 text-xs rounded border bg-white dark:bg-slate-700"
+        >
           <option value="44.1kHz">44.1kHz</option>
           <option value="48kHz">48kHz</option>
           <option value="96kHz">96kHz</option>
@@ -801,8 +806,11 @@ const handleExportCSV = () => {
       </div>
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-600 dark:text-slate-300">ビット深度</span>
-        <select value={bitDepth} onChange={(e)=>{setBitDepth(e.target.value as any); localStorage.setItem(AUDIO_SETTINGS_KEY+"_bd", e.target.value);}}
-          className="h-7 text-xs rounded border bg-white dark:bg-slate-700">
+        <select
+          value={bitDepth}
+          onChange={(e)=>{ setBitDepth(e.target.value as any); localStorage.setItem(AUDIO_SETTINGS_KEY+"_bd", e.target.value); }}
+          className="h-7 text-xs rounded border bg-white dark:bg-slate-700"
+        >
           <option value="16bit">16bit</option>
           <option value="24bit">24bit</option>
           <option value="32bit float">32bit float</option>
