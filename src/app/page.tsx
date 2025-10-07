@@ -189,7 +189,8 @@ function Stepper({
   return (
     <div className="space-y-1">
       <label className={`text-sm font-semibold ${palette.text}`}>{label}</label>
-      <div className="flex gap-2 items-center">
+      {/* ← justify-center を追加 */}
+      <div className="flex gap-2 items-center justify-center">
         {fast > 0 && (
           <button
             type="button"
@@ -206,6 +207,7 @@ function Stepper({
         >
           −
         </button>
+        {/* カウンターの幅を統一 */}
         <div
           className={`h-12 w-16 grid place-items-center text-xl border rounded-xl select-none ${palette.box} ${palette.text}`}
         >
@@ -231,8 +233,6 @@ function Stepper({
     </div>
   );
 }
-
-
 
 
 function SuffixRow({
