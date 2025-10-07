@@ -1157,69 +1157,104 @@ const handleExportCSV = () => {
         />
       </div>
 
-      {/* S# */}
+     {/* 2) S# */}
 <div className="space-y-1">
   <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">S#</label>
-  <div className="flex items-center gap-2">
-    {/* -5 */}
+  <div className="flex items-center justify-center gap-2">
     <button
       className="h-10 w-16 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={() => setSceneNum(Math.max(1, draft.sceneNum - 5))}
+      onClick={()=>setSceneNum(Math.max(1, draft.sceneNum-5))}
     >−5</button>
 
-    {/* -1 */}
     <button
       className="h-12 w-20 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={() => setSceneNum(Math.max(1, draft.sceneNum - 1))}
+      onClick={()=>setSceneNum(Math.max(1, draft.sceneNum-1))}
     >−</button>
 
-    {/* カウンター */}
     <div className="h-12 w-16 grid place-items-center text-lg border rounded-xl select-none bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100">
       {draft.sceneNum}
     </div>
 
-    {/* +1 */}
     <button
       className="h-12 w-20 border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={() => setSceneNum(draft.sceneNum + 1)}
+      onClick={()=>setSceneNum(draft.sceneNum+1)}
     >＋</button>
 
-    {/* +5 */}
     <button
       className="h-10 w-16 text-[11px] border rounded bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100"
-      onClick={() => setSceneNum(draft.sceneNum + 5)}
+      onClick={()=>setSceneNum(draft.sceneNum+5)}
     >+5</button>
   </div>
 
-      </div>
+  {/* サフィックス */}
+  <div className="flex items-center justify-center gap-1 flex-wrap">
+    {SUFFIXES.map(s=>{
+      const sel = draft.sceneSuffix===s;
+      const base = s===""
+        ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+        : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
+      return (
+        <button key={"s"+(s||"none")}
+          className={`h-9 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
+          onClick={()=>setDraft(d=>({...d, sceneSuffix:s}))}>
+          {s===""?"なし":s}
+        </button>
+      );
+    })}
+  </div>
+</div>
 
-     {/* C# */}
+
+    {/* 3) C# */}
 <div className="space-y-1">
   <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
-  <div className="flex items-center gap-2">
+  <div className="flex items-center justify-center gap-2">
     <button className="h-12 w-20 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-      onClick={() => setCutNum(Math.max(1, draft.cutNum - 1))}>−</button>
+      onClick={()=>setCutNum(Math.max(1, draft.cutNum-1))}>−</button>
+
     <div className="h-12 w-16 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
       {draft.cutNum}
     </div>
+
     <button className="h-12 w-20 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-      onClick={() => setCutNum(draft.cutNum + 1)}>＋</button>
+      onClick={()=>setCutNum(draft.cutNum+1)}>＋</button>
+  </div>
+
+  {/* サフィックス */}
+  <div className="flex items-center justify-center gap-1 flex-wrap">
+    {SUFFIXES.map(s=>{
+      const sel = draft.cutSuffix===s;
+      const base = s===""
+        ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+        : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
+      return (
+        <button key={"c"+(s||"none")}
+          className={`h-9 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
+          onClick={()=>setDraft(d=>({...d, cutSuffix:s}))}>
+          {s===""?"なし":s}
+        </button>
+      );
+    })}
   </div>
 </div>
 
-{/* T# */}
+
+{/* 4) T# */}
 <div className="space-y-1">
   <label className="text-xs font-semibold text-rose-900 dark:text-rose-100">T#</label>
-  <div className="flex items-center gap-2">
+  <div className="flex items-center justify-center gap-2">
     <button className="h-12 w-20 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
-      onClick={() => setDraft(d => ({ ...d, takeNum: Math.max(1, d.takeNum - 1) }))}>−</button>
+      onClick={()=>setDraft(d=>({...d, takeNum: Math.max(1, d.takeNum-1)}))}>−</button>
+
     <div className="h-12 w-16 grid place-items-center text-lg border rounded-xl select-none bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 text-rose-900 dark:text-rose-100">
       {draft.takeNum}
     </div>
+
     <button className="h-12 w-20 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
-      onClick={() => setDraft(d => ({ ...d, takeNum: d.takeNum + 1 }))}>＋</button>
+      onClick={()=>setDraft(d=>({...d, takeNum: d.takeNum+1}))}>＋</button>
   </div>
 </div>
+
 
 
       {/* 5) ステータス */}
