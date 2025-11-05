@@ -167,31 +167,36 @@ function Stepper({
   fast?: number;
 }) {
   const { num } = splitNumAndSuffix(value);
-  const clamp = (v: number) => Math.max(1, v);
+
+  // ▼ cut は「オンリー (-1)」を許容、他は 1〜
+  const min = variant === "cut" ? -1 : 1;
+  const clamp = (v: number) => (v < min ? min : v);
 
   const palette =
-    variant === "scene"
-      ? {
-          btn: "border-emerald-200 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-800 dark:hover:bg-emerald-700 dark:text-emerald-100",
-          box: "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/40 dark:border-emerald-700",
-          text: "text-emerald-900 dark:text-emerald-100",
-        }
-      : variant === "cut"
-      ? {
-          btn: "border-sky-200 bg-sky-100 hover:bg-sky-200 dark:bg-sky-800 dark:hover:bg-sky-700 dark:text-sky-100",
-          box: "bg-sky-50 border-sky-200 dark:bg-sky-900/40 dark:border-sky-700",
-          text: "text-sky-900 dark:text-sky-100",
-        }
-      : {
-          btn: "border-rose-200 bg-rose-100 hover:bg-rose-200 dark:bg-rose-800 dark:hover:bg-rose-700 dark:text-rose-100",
-          box: "bg-rose-50 border-rose-200 dark:bg-rose-900/40 dark:border-rose-700",
-          text: "text-rose-900 dark:text-rose-100",
-        };
+  variant === "scene"
+    ? {
+        text: "text-emerald-900 dark:text-emerald-100",
+        box: "bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700",
+        btn: "bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100",
+      }
+    : variant === "cut"
+    ? {
+        text: "text-sky-900 dark:text-sky-100",
+        box: "bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700",
+        btn: "bg-sky-100 dark:bg-sky-800 dark:text-sky-100",
+      }
+    : {
+        text: "text-rose-900 dark:text-rose-100",
+        box: "bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700",
+        btn: "bg-rose-100 dark:bg-rose-800 dark:text-rose-100",
+      };
+
+
+  const display = variant === "cut" && num === -1 ? "オンリー" : String(Math.max(1, num));
 
   return (
     <div className="space-y-1">
       <label className={`text-sm font-semibold ${palette.text}`}>{label}</label>
-      {/* ← justify-center を追加 */}
       <div className="flex gap-2 items-center justify-center">
         {fast > 0 && (
           <button
@@ -209,11 +214,10 @@ function Stepper({
         >
           −
         </button>
-        {/* カウンターの幅を統一 */}
         <div
           className={`h-12 w-16 grid place-items-center text-xl border rounded-xl select-none ${palette.box} ${palette.text}`}
         >
-          {num}
+          {display}
         </div>
         <button
           type="button"
@@ -328,6 +332,9 @@ function setCurrentProjectId(id: string) {
 }
 
 // ====== Main ======
+function compareByFileNo(a: TakeRow, b: TakeRow) {
+  return a.fileNo.localeCompare(b.fileNo, "ja");
+}
 function AppInner() {
   // theme & hand
   const [theme, setTheme] = useState<ThemeMode>(
@@ -516,78 +523,73 @@ useEffect(() => {
 
   // CRUD rows
   function addRow() {
-    pushHistory();
-    scrollToEndNext.current = true; 
-    const sceneStr = combine(draft.sceneNum, draft.sceneSuffix as Suffix);
-    const cutStr = combine(draft.cutNum, draft.cutSuffix as Suffix);
-    const takeStr = String(draft.takeNum);
-    if (!draft.fileNo || sceneStr === "" || cutStr === "" || takeStr === "") return alert("必須: ファイルNo / S# / C# / T#");
+  pushHistory();
+  scrollToEndNext.current = true; 
+  const sceneStr = combine(draft.sceneNum, draft.sceneSuffix as Suffix);
+  const cutStr = combine(draft.cutNum, draft.cutSuffix as Suffix);
+  const takeStr = String(draft.takeNum);
+  if (!draft.fileNo || sceneStr === "" || cutStr === "" || takeStr === "") return alert("必須: ファイルNo / S# / C# / T#");
 
-    const row: TakeRow = {
-      id: uuid(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      fileNo: draft.fileNo,
-      sceneNo: sceneStr,
-      cutNo: cutStr,
-      takeNo: takeStr,
-      status: draft.status,
-      mics: draft.mics,
-      note: draft.note,
-    };
-    const newRows = [...rows, row];
-    setRows(newRows);
+  const row: TakeRow = {
+    id: uuid(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    fileNo: draft.fileNo,
+    sceneNo: sceneStr,
+    cutNo: cutStr,
+    takeNo: takeStr,
+    status: draft.status,
+    mics: draft.mics,
+    note: draft.note,
+  };
 
-    // 次の初期値
-    setDraft((d) => {
-      const next = { ...d };
-      if (d.status === "OK") {
-        // OK後はカット+1、テイク=1
-        next.cutNum = (d.cutNum || 0) + 1;
-        next.cutSuffix = "";
-        next.takeNum = 1;
-      } else {
-        // NG/KEEP はテイクだけ +1
-        next.takeNum = d.takeNum + 1;
-      }
-      next.fileNo = nextFileNo(newRows);
-      return next;
-      // ▼ ここでファイル番号順に並べ替え
-newRows.sort((a, b) => a.fileNo.localeCompare(b.fileNo, "ja"));
+  // ▼ ここで追加→即ソート
+  const newRows = [...rows, row].sort(compareByFileNo);
+  setRows(newRows);
 
-setRows(newRows);
-    });
-  }
+  // ▼ 次の初期値（OKならカット+1、NG/KEEPはテイク+1）
+  setDraft((d) => {
+    const next = { ...d };
+    if (d.status === "OK") {
+      next.cutNum = d.cutNum === -1 ? 1 : (d.cutNum || 0) + 1; // オンリーの次は 1
+      next.cutSuffix = "";
+      next.takeNum = 1;
+    } else {
+      next.takeNum = d.takeNum + 1;
+    }
+    next.fileNo = nextFileNo(newRows);
+    return next;
+  });
+}
+
   function delRow(id: string) {
-    pushHistory();
-    if (!confirm("削除しますか？")) return;
-    setRows((p) => p.filter((r) => r.id !== id));
-  }
-  function editRow(id: string) {
-    const r = rows.find((x) => x.id === id);
-    if (!r) return;
-    const sc = splitNumAndSuffix(r.sceneNo);
-    const cu = splitNumAndSuffix(r.cutNo);
-    setDraft((d) => ({
-      ...d,
-      fileNo: r.fileNo,
-      sceneNum: Math.max(1, sc.num),
-      sceneSuffix: sc.suffix,
-      cutNum: Math.max(1, cu.num),
-      cutSuffix: cu.suffix,
-      takeNum: parseInt(r.takeNo || "1", 10) || 1,
-      status: r.status,
-      mics: r.mics || Array(8).fill(""),
-      note: r.note || "",
-    }));
-    setRows((p) => p.filter((x) => x.id !== id));
-    setRows((p) => {
-  const updated = p.map((x) => (x.id === id ? { ...r } : x));
-  // ▼ ここも同様にソート
-  return updated.sort((a, b) => a.fileNo.localeCompare(b.fileNo, "ja"));
-});
+  pushHistory();
+  if (!confirm("削除しますか？")) return;
+  setRows((p) => p.filter((r) => r.id !== id).sort(compareByFileNo));
+}
 
-  }
+  function editRow(id: string) {
+  const r = rows.find((x) => x.id === id);
+  if (!r) return;
+  const sc = splitNumAndSuffix(r.sceneNo);
+  const cu = splitNumAndSuffix(r.cutNo);
+
+  setDraft((d) => ({
+    ...d,
+    fileNo: r.fileNo,
+    sceneNum: Math.max(1, sc.num),
+    sceneSuffix: sc.suffix,
+    cutNum: cu.num === -1 ? -1 : Math.max(1, cu.num),
+    cutSuffix: cu.suffix,
+    takeNum: parseInt(r.takeNo || "1", 10) || 1,
+    status: r.status,
+    mics: r.mics || Array(8).fill(""),
+    note: r.note || "",
+  }));
+
+  // ▼ 取り除いた後に必ずソート
+  setRows((p) => p.filter((x) => x.id !== id).sort(compareByFileNo));
+}
 
   function resetCounters() {
     pushHistory();
@@ -1205,34 +1207,55 @@ const handleExportCSV = () => {
       </div>
 
       {/* 3) C# */}
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
-        <div className="flex items-center justify-center gap-2">
-          <button className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-                  onClick={()=>setCutNum(Math.max(1, draft.cutNum-1))}>−</button>
-          <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
-            {draft.cutNum}
-          </div>
-          <button className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-                  onClick={()=>setCutNum(draft.cutNum+1)}>＋</button>
-        </div>
-        {/* サフィックス */}
-        <div className="flex items-center gap-1 flex-wrap justify-center">
-          {SUFFIXES.map(s=>{
-            const sel = draft.cutSuffix===s;
-            const base = s===""
-              ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
-              : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
-            return (
-              <button key={"c"+(s||"none")}
-                className={`h-9 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
-                onClick={()=>setDraft(d=>({...d, cutSuffix:s}))}>
-                {s===""?"なし":s}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+<div className="space-y-1">
+  <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
+  <div className="flex items-center justify-center gap-2">
+    <button
+      className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+      onClick={() => {
+        // 1 → -1（オンリー）、それ以外は通常デクリメント（ただし 1 未満は -1 に丸め）
+        const n = draft.cutNum === 1 ? -1 : draft.cutNum - 1;
+        setCutNum(n);
+      }}
+    >
+      −
+    </button>
+    <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
+      {draft.cutNum === -1 ? "オンリー" : draft.cutNum}
+    </div>
+    <button
+      className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+      onClick={() => {
+        // -1 → 1 にジャンプ、それ以外は通常インクリメント
+        const n = draft.cutNum === -1 ? 1 : draft.cutNum + 1;
+        setCutNum(n);
+      }}
+    >
+      ＋
+    </button>
+  </div>
+  {/* サフィックスはそのまま（オンリー時は見た目だけ、値は無視） */}
+  <div className="flex items-center gap-1 flex-wrap justify-center">
+    {SUFFIXES.map((s) => {
+      const sel = draft.cutSuffix === s;
+      const base =
+        s === ""
+          ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+          : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
+      return (
+        <button
+          key={"c" + (s || "none")}
+          className={`h-9 px-2 text-[11px] rounded border ${base} ${sel ? "ring-2 ring-violet-300" : ""}`}
+          onClick={() => setDraft((d) => ({ ...d, cutSuffix: s }))}
+          disabled={draft.cutNum === -1} // オンリー時は無効化してもOK（任意）
+        >
+          {s === "" ? "なし" : s}
+        </button>
+      );
+    })}
+  </div>
+</div>
+
 
       {/* 4) T# */}
       <div className="space-y-1">
