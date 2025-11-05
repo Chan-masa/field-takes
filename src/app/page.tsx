@@ -173,24 +173,23 @@ function Stepper({
   const clamp = (v: number) => (v < min ? min : v);
 
   const palette =
-  variant === "scene"
-    ? {
-        text: "text-emerald-900 dark:text-emerald-100",
-        box: "bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700",
-        btn: "bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100",
-      }
-    : variant === "cut"
-    ? {
-        text: "text-sky-900 dark:text-sky-100",
-        box: "bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700",
-        btn: "bg-sky-100 dark:bg-sky-800 dark:text-sky-100",
-      }
-    : {
-        text: "text-rose-900 dark:text-rose-100",
-        box: "bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700",
-        btn: "bg-rose-100 dark:bg-rose-800 dark:text-rose-100",
-      };
-
+    variant === "scene"
+      ? {
+          text: "text-emerald-900 dark:text-emerald-100",
+          box: "bg-emerald-50 dark:bg-emerald-900/40 dark:border-emerald-700",
+          btn: "bg-emerald-100 dark:bg-emerald-800 dark:text-emerald-100",
+        }
+      : variant === "cut"
+      ? {
+          text: "text-sky-900 dark:text-sky-100",
+          box: "bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700",
+          btn: "bg-sky-100 dark:bg-sky-800 dark:text-sky-100",
+        }
+      : {
+          text: "text-rose-900 dark:text-rose-100",
+          box: "bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700",
+          btn: "bg-rose-100 dark:bg-rose-800 dark:text-rose-100",
+        };
 
   const display = variant === "cut" && num === -1 ? "オンリー" : String(Math.max(1, num));
 
@@ -202,35 +201,71 @@ function Stepper({
           <button
             type="button"
             className={`h-10 w-16 text-xs border rounded ${palette.btn}`}
-            onClick={() => onChange(String(clamp(num - fast)))}
+            onClick={() => {
+              if (variant === "cut") {
+                // 1 → -1（オンリー）を優先。その他は通常の fast 減算
+                const n = num === 1 ? -1 : clamp(num - fast);
+                onChange(String(n));
+              } else {
+                onChange(String(clamp(num - fast)));
+              }
+            }}
           >
             −{fast}
           </button>
         )}
+
         <button
           type="button"
           className={`h-12 w-20 border rounded ${palette.btn}`}
-          onClick={() => onChange(String(clamp(num - 1)))}
+          onClick={() => {
+            if (variant === "cut") {
+              // 1 → -1（オンリー）、それ以外は通常デクリメント
+              const n = num === 1 ? -1 : clamp(num - 1);
+              onChange(String(n));
+            } else {
+              onChange(String(clamp(num - 1)));
+            }
+          }}
         >
           −
         </button>
+
         <div
           className={`h-12 w-16 grid place-items-center text-xl border rounded-xl select-none ${palette.box} ${palette.text}`}
         >
           {display}
         </div>
+
         <button
           type="button"
           className={`h-12 w-20 border rounded ${palette.btn}`}
-          onClick={() => onChange(String(clamp(num + 1)))}
+          onClick={() => {
+            if (variant === "cut") {
+              // -1（オンリー）→ 1、それ以外は通常インクリメント
+              const n = num === -1 ? 1 : clamp(num + 1);
+              onChange(String(n));
+            } else {
+              onChange(String(clamp(num + 1)));
+            }
+          }}
         >
           ＋
         </button>
+
         {fast > 0 && (
           <button
             type="button"
             className={`h-10 w-16 text-xs border rounded ${palette.btn}`}
-            onClick={() => onChange(String(clamp(num + fast)))}
+            onClick={() => {
+              if (variant === "cut") {
+                // オンリーからの高速増分は 1 起点に
+                const base = num === -1 ? 1 : num;
+                onChange(String(clamp(base + fast)));
+              } else {
+                onChange(String(clamp(num + fast)));
+              }
+            }}
           >
             +{fast}
           </button>
@@ -239,6 +274,7 @@ function Stepper({
     </div>
   );
 }
+
 
 
 function SuffixRow({
