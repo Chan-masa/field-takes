@@ -65,13 +65,13 @@ function nextFileNo(rows: TakeRow[]): string {
   return `${prefix}_${String(max + 1).padStart(3, "0")}`;
 }
 function splitNumAndSuffix(value: string): { num: number; suffix: Suffix } {
-  if (value === "オンリー") return { num: -1, suffix: "" };
+  if (value === "Only") return { num: -1, suffix: "" };
   const m = String(value || "").match(/^(\d+)([a-g]?)$/i);
   if (!m) return { num: parseInt(value || "0", 10) || 0, suffix: "" };
   return { num: parseInt(m[1], 10) || 0, suffix: (m[2] || "") as Suffix };
 }
 function combine(num: number, suffix: Suffix) {
-  if (num === -1) return "オンリー";
+  if (num === -1) return "Only";
   return `${Math.max(1, num)}${suffix}`;
 }
 function formatDT(iso: string): string {
@@ -191,7 +191,7 @@ function Stepper({
           btn: "bg-rose-100 dark:bg-rose-800 dark:text-rose-100",
         };
 
-  const display = variant === "cut" && num === -1 ? "オンリー" : String(Math.max(1, num));
+  const display = variant === "cut" && num === -1 ? "Only" : String(Math.max(1, num));
 
   return (
     <div className="space-y-1">
@@ -1258,7 +1258,7 @@ const handleExportCSV = () => {
       −
     </button>
     <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
-      {draft.cutNum === -1 ? "オンリー" : draft.cutNum}
+      {draft.cutNum === -1 ? "Only" : draft.cutNum}
     </div>
     <button
       className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
@@ -1439,7 +1439,57 @@ const handleExportCSV = () => {
         </div>
       </div>
 
-    
+     {/* 3) C#（モバイル） */}
+<div className="space-y-1">
+  <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
+  <div className="flex items-center justify-center gap-2">
+    <button
+      className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+      onClick={() => {
+        // 1 → -1（オンリー）、それ以外は通常デクリメント
+        const n = draft.cutNum === 1 ? -1 : draft.cutNum - 1;
+        setCutNum(n);
+      }}
+    >
+      −
+    </button>
+    <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
+      {draft.cutNum === -1 ? "Only" : draft.cutNum}
+    </div>
+    <button
+      className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+      onClick={() => {
+        // -1 → 1 にジャンプ、それ以外は通常インクリメント
+        const n = draft.cutNum === -1 ? 1 : draft.cutNum + 1;
+        setCutNum(n);
+      }}
+    >
+      ＋
+    </button>
+  </div>
+
+  {/* オンリー時はサフィックス無効化（任意） */}
+  <div className="flex items-center gap-1 flex-wrap justify-center">
+    {SUFFIXES.map((s) => {
+      const sel = draft.cutSuffix === s;
+      const base =
+        s === ""
+          ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
+          : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
+      return (
+        <button
+          key={"c" + (s || "none")}
+          className={`h-9 px-2 text-[11px] rounded border ${base} ${sel ? "ring-2 ring-violet-300" : ""}`}
+          onClick={() => setDraft((d) => ({ ...d, cutSuffix: s }))}
+          disabled={draft.cutNum === -1}
+        >
+          {s === "" ? "なし" : s}
+        </button>
+      );
+    })}
+  </div>
+</div>
+
 
       {/* 4) T# */}
       <div className="space-y-1">
