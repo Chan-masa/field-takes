@@ -554,8 +554,9 @@ useEffect(() => {
     setDraft((d) => ({ ...d, sceneNum: Math.max(1,n), cutNum: 1, cutSuffix: "", takeNum: 1 }));
   }
   function setCutNum(n: number) {
-    setDraft((d) => ({ ...d, cutNum: Math.max(1,n), takeNum: 1 }));
-  }
+  setDraft((d) => ({ ...d, cutNum: n === -1 ? -1 : Math.max(1, n), takeNum: 1 }));
+}
+
 
   // CRUD rows
   function addRow() {
@@ -1242,14 +1243,14 @@ const handleExportCSV = () => {
         </div>
       </div>
 
-      {/* 3) C# */}
+      {/* 3) C#（モバイル） */}
 <div className="space-y-1">
   <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
   <div className="flex items-center justify-center gap-2">
     <button
       className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
       onClick={() => {
-        // 1 → -1（オンリー）、それ以外は通常デクリメント（ただし 1 未満は -1 に丸め）
+        // 1 → -1（オンリー）、それ以外は通常デクリメント
         const n = draft.cutNum === 1 ? -1 : draft.cutNum - 1;
         setCutNum(n);
       }}
@@ -1270,7 +1271,8 @@ const handleExportCSV = () => {
       ＋
     </button>
   </div>
-  {/* サフィックスはそのまま（オンリー時は見た目だけ、値は無視） */}
+
+  {/* オンリー時はサフィックス無効化（任意） */}
   <div className="flex items-center gap-1 flex-wrap justify-center">
     {SUFFIXES.map((s) => {
       const sel = draft.cutSuffix === s;
@@ -1283,7 +1285,7 @@ const handleExportCSV = () => {
           key={"c" + (s || "none")}
           className={`h-9 px-2 text-[11px] rounded border ${base} ${sel ? "ring-2 ring-violet-300" : ""}`}
           onClick={() => setDraft((d) => ({ ...d, cutSuffix: s }))}
-          disabled={draft.cutNum === -1} // オンリー時は無効化してもOK（任意）
+          disabled={draft.cutNum === -1}
         >
           {s === "" ? "なし" : s}
         </button>
@@ -1291,6 +1293,7 @@ const handleExportCSV = () => {
     })}
   </div>
 </div>
+
 
 
       {/* 4) T# */}
@@ -1436,35 +1439,7 @@ const handleExportCSV = () => {
         </div>
       </div>
 
-      {/* 3) C# */}
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
-        <div className="flex items-center justify-center gap-2">
-          <button className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-                  onClick={()=>setCutNum(Math.max(1, draft.cutNum-1))}>−</button>
-          <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
-            {draft.cutNum}
-          </div>
-          <button className="h-12 w-16 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-                  onClick={()=>setCutNum(draft.cutNum+1)}>＋</button>
-        </div>
-        {/* サフィックス */}
-        <div className="flex items-center gap-1 flex-wrap justify-center">
-          {SUFFIXES.map(s=>{
-            const sel = draft.cutSuffix===s;
-            const base = s===""
-              ? "bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-700 dark:border-slate-500 dark:text-slate-100"
-              : "bg-violet-50 border-violet-300 text-violet-800 dark:bg-violet-800 dark:border-violet-600 dark:text-violet-100";
-            return (
-              <button key={"c"+(s||"none")}
-                className={`h-9 px-2 text-[11px] rounded border ${base} ${sel?"ring-2 ring-violet-300":""}`}
-                onClick={()=>setDraft(d=>({...d, cutSuffix:s}))}>
-                {s===""?"なし":s}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    
 
       {/* 4) T# */}
       <div className="space-y-1">
