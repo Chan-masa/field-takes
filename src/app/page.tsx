@@ -65,11 +65,13 @@ function nextFileNo(rows: TakeRow[]): string {
   return `${prefix}_${String(max + 1).padStart(3, "0")}`;
 }
 function splitNumAndSuffix(value: string): { num: number; suffix: Suffix } {
+  if (value === "オンリー") return { num: -1, suffix: "" };
   const m = String(value || "").match(/^(\d+)([a-g]?)$/i);
   if (!m) return { num: parseInt(value || "0", 10) || 0, suffix: "" };
   return { num: parseInt(m[1], 10) || 0, suffix: (m[2] || "") as Suffix };
 }
 function combine(num: number, suffix: Suffix) {
+  if (num === -1) return "オンリー";
   return `${Math.max(1, num)}${suffix}`;
 }
 function formatDT(iso: string): string {
@@ -550,6 +552,10 @@ useEffect(() => {
       }
       next.fileNo = nextFileNo(newRows);
       return next;
+      // ▼ ここでファイル番号順に並べ替え
+newRows.sort((a, b) => a.fileNo.localeCompare(b.fileNo, "ja"));
+
+setRows(newRows);
     });
   }
   function delRow(id: string) {
@@ -575,6 +581,12 @@ useEffect(() => {
       note: r.note || "",
     }));
     setRows((p) => p.filter((x) => x.id !== id));
+    setRows((p) => {
+  const updated = p.map((x) => (x.id === id ? { ...r } : x));
+  // ▼ ここも同様にソート
+  return updated.sort((a, b) => a.fileNo.localeCompare(b.fileNo, "ja"));
+});
+
   }
 
   function resetCounters() {
@@ -1209,16 +1221,35 @@ const handleExportCSV = () => {
 <div className="space-y-1">
   <label className="text-xs font-semibold text-sky-900 dark:text-sky-100">C#</label>
   <div className="flex items-center justify-center gap-2">
-    <button className="h-12 w-20 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-      onClick={()=>setCutNum(Math.max(1, draft.cutNum-1))}>−</button>
+    {/* −ボタン */}
+    <button
+      className="h-12 w-20 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+      onClick={() => {
+        if (draft.cutNum === 1) setCutNum(-1);
+        else setCutNum(draft.cutNum - 1);
+      }}
+    >
+      −
+    </button>
 
+    {/* 数値（またはオンリー）表示 */}
     <div className="h-12 w-16 grid place-items-center text-lg border rounded-xl select-none bg-sky-50 dark:bg-sky-900/40 dark:border-sky-700 text-sky-900 dark:text-sky-100">
-      {draft.cutNum}
+      {draft.cutNum === -1 ? "オンリー" : draft.cutNum}
     </div>
 
-    <button className="h-12 w-20 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
-      onClick={()=>setCutNum(draft.cutNum+1)}>＋</button>
+    {/* ＋ボタン */}
+    <button
+      className="h-12 w-20 border rounded bg-sky-100 dark:bg-sky-800 dark:text-sky-100"
+      onClick={() => {
+        if (draft.cutNum === -1) setCutNum(1);
+        else setCutNum(draft.cutNum + 1);
+      }}
+    >
+      ＋
+    </button>
   </div>
+</div>
+
 
   {/* サフィックス */}
   <div className="flex items-center justify-center gap-1 flex-wrap">
