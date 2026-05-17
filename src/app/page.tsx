@@ -169,8 +169,8 @@ function Stepper({
   const { num } = splitNumAndSuffix(value);
 
   // ▼ cut は「オンリー (-1)」を許容、他は 1〜
-  const min = variant === "cut" ? -1 : 1;
-  const clamp = (v: number) => (v < min ? min : v);
+  const min = variant === "cut" ? -1 : variant === "take" ? 0 : 1;
+const clamp = (v: number) => (v < min ? min : v);
 
   const palette =
     variant === "scene"
@@ -191,7 +191,10 @@ function Stepper({
           btn: "bg-rose-100 dark:bg-rose-800 dark:text-rose-100",
         };
 
-  const display = variant === "cut" && num === -1 ? "Only" : String(Math.max(1, num));
+  const display = 
+  variant === "cut" && num === -1 ? "Only" : 
+  variant === "take" && num === 0 ? "TEST" : 
+  String(Math.max(1, num));
 
   return (
     <div className="space-y-1">
@@ -1036,11 +1039,11 @@ const handleExportCSV = () => {
                   {/* T# */}
                   <div className="col-span-2">
                     <Stepper
-                      label="T#"
-                      value={String(draft.takeNum)}
-                      onChange={(v) => setDraft((d) => ({ ...d, takeNum: Math.max(1, parseInt(v || "1", 10) || 1) }))}
-                      variant="take"
-                    />
+  label="T#"
+  value={String(draft.takeNum)}
+  onChange={(v) => setDraft((d) => ({ ...d, takeNum: Math.max(0, parseInt(v || "0", 10) || 0) }))}
+  variant="take"
+/>
                   </div>
                 </div>
 
@@ -1301,7 +1304,7 @@ const handleExportCSV = () => {
         <label className="text-xs font-semibold text-rose-900 dark:text-rose-100">T#</label>
         <div className="flex items-center justify-center gap-2">
           <button className="h-12 w-16 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
-                  onClick={()=>setDraft(d=>({...d, takeNum: Math.max(1, d.takeNum-1)}))}>−</button>
+                  onClick={()=>setDraft(d=>({...d, takeNum: Math.max(0, d.takeNum-1)}))}>−</button>
           <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 text-rose-900 dark:text-rose-100">
             {draft.takeNum}
           </div>
@@ -1496,7 +1499,7 @@ const handleExportCSV = () => {
         <label className="text-xs font-semibold text-rose-900 dark:text-rose-100">T#</label>
         <div className="flex items-center justify-center gap-2">
           <button className="h-12 w-16 border rounded bg-rose-100 dark:bg-rose-800 dark:text-rose-100"
-                  onClick={()=>setDraft(d=>({...d, takeNum: Math.max(1, d.takeNum-1)}))}>−</button>
+                  onClick={()=>setDraft(d=>({...d, takeNum: Math.max(0, d.takeNum-1)}))}>−</button>
           <div className="h-12 w-20 grid place-items-center text-lg border rounded-xl select-none bg-rose-50 dark:bg-rose-900/40 dark:border-rose-700 text-rose-900 dark:text-rose-100">
             {draft.takeNum}
           </div>
